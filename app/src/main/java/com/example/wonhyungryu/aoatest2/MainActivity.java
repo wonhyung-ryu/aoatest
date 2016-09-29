@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
     String res_buf = new String();
     int result_line = 0;
-    private static final String ACTION_USB_PERMISSION = "com.exam.aoatest.action.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.example.wonhyungryu.aoatest2.action.USB_PERMISSION";
     private static final String TAG = "[AOATest]";
 
     private UsbManager mUsbManager;
@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
                 UsbAccessory accessory = UsbManager.getAccessory(intent);
                 if (accessory != null && accessory.equals(mAccessory)) {
+                    Log.d(TAG, "ACTION_USB_ACCESSORY_DETACHED");
                     result_win_log("ACTION_USB_ACCESSORY_DETACHED", true);
                     closeAccessory();
                 }
@@ -117,16 +118,11 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     @Override
     public void onResume() {
         super.onResume();
-
-        Intent intent = getIntent();
-        if (mInputStream != null && mOutputStream != null) {
-            return;
-        }
-
         UsbAccessory[] accessories = mUsbManager.getAccessoryList();
         UsbAccessory accessory = (accessories == null ? null : accessories[0]);
         if (accessory != null) {
             result_win_log("USB Host connected", true);
+            Log.d(TAG, "USB Host connected");
             if (mUsbManager.hasPermission(accessory)) {
                 openAccessory(accessory);
             } else {
@@ -190,71 +186,23 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
     public void run() {
         int ret = 0;
-        byte[] buffer = new byte[20];
+        byte[] buffer = new byte[16384];
         int i,j;
 
         while (ret >= 0) {
             try {
                 ret = mInputStream.read(buffer);
+                Log.d(TAG, "mInputStream.read : "+ ret);
             } catch (IOException e) {
                 break;
             }
 
-            j = buffer[5]<<8+buffer[6]+8;  // total packet length
+ //           j = buffer[5]<<8+buffer[6]+8;  // total packet length
+            j = 52;  // dummy data receive..
             for (int k = 0; k<j; k++) {
-                result_win_log("0x" + toHexString(buffer[k]) + " ", false);
+ //               result_win_log("0x" + toHexString(buffer[k]) + " ", false);
+                Log.d(TAG,"0x" + toHexString(buffer[k]) + " ");
             }
-            i = 0;
-            while (i < ret) {
-                int len = ret - i;
-/*
-                switch (buffer[i]) {
-                    case 0x1:
-                        if (len >= 3) {
-                            Message m = Message.obtain(mHandler, MESSAGE_SWITCH);
-                            m.obj = new SwitchMsg(buffer[i + 1], buffer[i + 2]);
-                            mHandler.sendMessage(m);
-                        }
-                        i += 3;
-                        break;
-
-                    case 0x4:
-                        if (len >= 3) {
-                            Message m = Message.obtain(mHandler,
-                                    MESSAGE_TEMPERATURE);
-                            m.obj = new TemperatureMsg(composeInt(buffer[i + 1],
-                                    buffer[i + 2]));
-                            mHandler.sendMessage(m);
-                        }
-                        i += 3;
-                        break;
-
-                    case 0x5:
-                        if (len >= 3) {
-                            Message m = Message.obtain(mHandler, MESSAGE_LIGHT);
-                            m.obj = new LightMsg(composeInt(buffer[i + 1],
-                                    buffer[i + 2]));
-                            mHandler.sendMessage(m);
-                        }
-                        i += 3;
-                        break;
-
-                    case 0x6:
-                        if (len >= 3) {
-                            Message m = Message.obtain(mHandler, MESSAGE_JOY);
-                            m.obj = new JoyMsg(buffer[i + 1], buffer[i + 2]);
-                            mHandler.sendMessage(m);
-                        }
-                        i += 3;
-                        break;
-
-                    default:
-                        Log.d(TAG, "unknown msg: " + buffer[i]);
-                        i = len;
-                        break;
-                }*/
-            }
-
         }
     }
 
@@ -267,36 +215,6 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         val += (int) lo & 0xff;
         return val;
     }
-/*
-    Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_SWITCH:
-                    SwitchMsg o = (SwitchMsg) msg.obj;
-                    handleSwitchMessage(o);
-                    break;
-
-                case MESSAGE_TEMPERATURE:
-                    TemperatureMsg t = (TemperatureMsg) msg.obj;
-                    handleTemperatureMessage(t);
-                    break;
-
-                case MESSAGE_LIGHT:
-                    LightMsg l = (LightMsg) msg.obj;
-                    handleLightMessage(l);
-                    break;
-
-                case MESSAGE_JOY:
-                    JoyMsg j = (JoyMsg) msg.obj;
-                    handleJoyMessage(j);
-                    break;
-
-            }
-        }
-    };
-*/
-// sendCommand((byte) 0x12, new byte[]{0x00, 0x01}, new byte[]{0x00, 0x02}, new byte[]{(byte) 0xEF, (byte) 0xFF});
 
     public void sendCommand(byte receiver, byte[] ID, byte[] datalen, byte[] data) {
         int pack_len = (int)datalen[0]*256 + (int)datalen[1] + 12;
@@ -339,25 +257,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             }
         }
     }
-    /*
-    public void sendCommand(byte command, byte target, int value) {
-        byte[] buffer = new byte[3];
-        if (value > 255)
-            value = 255;
 
-        buffer[0] = command;
-        buffer[1] = target;
-        buffer[2] = (byte) value;
-        if (mOutputStream != null && buffer[1] != -1) {
-            try {
-                mOutputStream.write(buffer);
-            } catch (IOException e) {
-                Log.e(TAG, "write failed", e);
-                result_win_log("Write failed",true);
-            }
-        }
-    }
-*/
     private void result_win_log (String lmsg, boolean yn) {
         TextView mresult = (TextView) findViewById(R.id.result);
         if (result_line >= 25) {
