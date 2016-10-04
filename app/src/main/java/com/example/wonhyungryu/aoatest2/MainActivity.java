@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 //result_win_log("SEND 1", true);
             }
         });
-
+/*
         Button mBTN_S2=(Button)findViewById(R.id.BTN_S2);
         mBTN_S2.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
@@ -75,15 +75,22 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 transPkt.setReceiver(transPkt.ID_ALL);
                 transPkt.setmID((char)0x44);
                 transPkt.setData(buf);
-                /* -----------------------------------------------------------*/
+
+                Log.i(TAG, "Tx data: " + byteArrayToHex(transPkt.getPkt_buf()));
+
                 RCV_packet rPkt = new RCV_packet();
                 int err = rPkt.pktParse(transPkt.getPkt_buf());
                 if (err != 0) {
                     Log.i(TAG, "Receive ERROR : "+err);
-                    for (int k = 0; k<50; k++) {
+                    for (int k = 0; k<buf.length+12; k++) {
                         Log.d(TAG,"0x" + toHexString(transPkt.getPkt_buf()[k]) + " ");
                     }
                 }
+                result_win_log( "STARTFRAME "+ (rPkt.getSTARTFRAME()&0xFFFF),true);
+                result_win_log( "Sender "+ new Byte(rPkt.getSender()).toString(),true);
+                result_win_log( "Receiver "+ new Byte(rPkt.getReceiver()).toString(),true);
+                result_win_log( "mID "+ (rPkt.getmID()&0xFFFF),true);
+                result_win_log( "ENDFRAME "+ (rPkt.getENDFRAME()&0xFFFFFFFF),true);
 
             }
         });
@@ -93,14 +100,13 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             public void onClick(View v) {
                 makeData();
             }
-        });
+        });*/
     }
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            result_win_log("BroadcastReceiver", true);
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
                     UsbAccessory accessory = UsbManager.getAccessory(intent);
@@ -198,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             try {
                 ret = mInputStream.read(buffer);
                 Log.d(TAG, "mInputStream.read : "+ ret);
+                Log.d(TAG, "Rx data: " + byteArrayToHex(buffer));
             } catch (IOException e) {
                 break;
             }
@@ -206,12 +213,18 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 RCV_packet rPkt = new RCV_packet();
                 int err = rPkt.pktParse(buffer);
                 if (err != 0) {
-                    Log.i(TAG, "Receive ERROR : "+err);
-                    for (int k = 0; k<50; k++) {
-                        Log.d(TAG,"0x" + toHexString(buffer[k]) + " ");
+                    Log.i(TAG, "Receive ERROR : " + err);
+                    for (int k = 0; k < 50; k++) {
+                        Log.d(TAG, "0x" + toHexString(buffer[k]) + " ");
                     }
                 }
+                Log.d(TAG, "STARTFRAME " + (rPkt.getSTARTFRAME() & 0xFFFF));
+                Log.d(TAG, "Sender " + Integer.toString(rPkt.getSender() & 0xFF));
+                Log.d(TAG, "Receiver " + Integer.toString(rPkt.getReceiver() & 0xFF));
+                Log.d(TAG, "mID " + (rPkt.getmID() & 0xFFFF));
+                Log.d(TAG, "ENDFRAME " + (rPkt.getENDFRAME() & 0xFFFFFFFF));
             }
+
         }
     }
 
@@ -224,17 +237,15 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
     // Transfer Example Code
     void makeData () {
-        byte []buf = {(byte) 0x11, (byte) 0x43, (byte) 0xA1, (byte) 0x32, (byte) 0x24, (byte) 0x07, (byte) 0xB4, (byte) 0xFC,
-                (byte) 0x43, (byte) 0xFF, (byte) 0x24, (byte) 0xFF, (byte) 0xFF, (byte) 0x07, (byte) 0xFC, (byte) 0xB4,
-                (byte) 0xEF, (byte) 0x43, (byte) 0x24, (byte) 0xFF, (byte) 0x07, (byte) 0xFF, (byte) 0xB4, (byte) 0xFF,
-                (byte) 0x24, (byte) 0xFC, (byte) 0x07, (byte) 0x43, (byte) 0x24, (byte) 0xFC};
+        byte []buf = {(byte) 26, (byte) 24, (byte) 3, (byte) 0x02, (byte) 0x01,
+                        (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0};
 
         TR_packet transPkt = new TR_packet();
 
         transPkt.packet_init((char)10);
-        transPkt.setSender(transPkt.ID_DM);
-        transPkt.setReceiver(transPkt.ID_ALL);
-        transPkt.setmID((char)0x44);
+        transPkt.setSender(transPkt.ID_TPDV);
+        transPkt.setReceiver(transPkt.ID_TPCR);
+        transPkt.setmID((char)0x02);
         transPkt.setData(buf);
 
         for (int k1 = 0; k1<12+10; k1++) {
@@ -256,7 +267,15 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     }
 
 
-
+    public static String byteArrayToHex(byte[] ba) {
+        StringBuffer sb = new StringBuffer(ba.length * 2);
+        String hexNumber;
+        for (int x = 0; x < ba.length; x++) {
+            hexNumber = "0" + Integer.toHexString(0xff & ba[x]);
+            sb.append(hexNumber.substring(hexNumber.length() - 2));
+        }
+        return sb.toString();
+    }
 
     private void result_win_log (String lmsg, boolean yn) {
         TextView mResult = (TextView) findViewById(R.id.result);

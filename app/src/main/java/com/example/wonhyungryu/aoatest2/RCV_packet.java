@@ -12,15 +12,19 @@ import static com.example.wonhyungryu.aoatest2.TR_packet.ID_TPDV;
  */
 
 public class RCV_packet {
-    private char STARTFRAME = 0x00DD;
-    private byte sender; // ID_TPDV, ID_TPCR
-    private byte receiver;
-    private char mID; // message ID
-    private char dlength; // data length
-    private int ENDFRAME = 0xE0;
+    private char STARTFRAME = 0;
+    private byte sender = ID_NONE; // ID_TPDV, ID_TPCR
+    private byte receiver = ID_NONE;
+    private char mID = 0; // message ID
+    private char dlength = 0; // data length
+    private int ENDFRAME = 0;
     private byte [] data;
 
     private static final String TAG = "[AOATest]";
+
+    public char getSTARTFRAME() {
+        return STARTFRAME;
+    }
 
     public byte getSender() {
         return sender;
@@ -42,11 +46,15 @@ public class RCV_packet {
         return dlength;
     }
 
+    public int getENDFRAME() {
+        return ENDFRAME;
+    }
+
     public int pktParse(byte[] buf) {
-        // consider little-endian
-        STARTFRAME = (char)((byte)(buf[1]<<8)+buf[0]);
-        if(STARTFRAME != 0xDD){
-            Log.i(TAG, "START FRAME incorrect!"+ STARTFRAME);
+        // consider Byte order
+        STARTFRAME = (char)(((buf[1]&0xFF)<<8)+(buf[0]&0xFF));
+        if(STARTFRAME != 0x00DD){
+            Log.i(TAG, "START FRAME incorrect! "+ STARTFRAME + " "+(buf[0]&0xFF) +" "+(buf[1]&0xFF));
             return -1;
         }
         sender = buf[2];
@@ -58,17 +66,18 @@ public class RCV_packet {
             return -2;
         }
 
-        // consider little-endian
-        mID = (char)((byte)(buf[5]<<8)+buf[4]);
+        // consider Byte order
+        mID = (char)(((buf[5]&0xFF)<<8)+(buf[4]&0xFF));
         Log.i(TAG, "mID : "+ mID);
-        // consider little-endian
-        dlength = (char)((byte)(buf[7]<<8)+buf[6]);
+        // consider Byte order
+        dlength = (char)(((buf[7]&0xFF)<<8)+(buf[6]&0xFF));
         Log.i(TAG, "data length : "+ dlength);
 
         data = new byte[dlength];
         System.arraycopy(buf, 8, data, 0, dlength);
 
-        ENDFRAME = (char)(((byte)buf[8+dlength]<<24)+((byte)buf[8+dlength+1]<<16)+((byte)buf[8+dlength+2]<<8)+(byte)buf[8+dlength+3]);
+        // consider Byte order
+        ENDFRAME = (((buf[8+dlength+3]&0xFF)<<24)+((buf[8+dlength+2]&0xFF)<<16)+((buf[8+dlength+1]&0xFF)<<8)+(buf[8+dlength+0]&0xFF));
         if(ENDFRAME != 0xE0) {
             Log.i(TAG, "END FRAME incorrect!"+ ENDFRAME);
             return -3;

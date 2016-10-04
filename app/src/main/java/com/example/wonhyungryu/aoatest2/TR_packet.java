@@ -18,14 +18,19 @@ public class TR_packet {
     public void packet_init(char data_length) {
         this.dlength = data_length;
         pkt_buf = new byte[data_length+12];
-        pkt_buf[0] = (byte) ((STARTFRAME & 0xFF00)>>8);
-        pkt_buf[1] = (byte) (STARTFRAME & 0x00FF);
-        pkt_buf[6] = (byte) ((data_length & 0xFF00)>>8);
-        pkt_buf[7] = (byte) (data_length & 0xFF);
-        pkt_buf[data_length+8] = (byte) ((ENDFRAME & 0xFF000000)>>24);
-        pkt_buf[data_length+9] = (byte) ((ENDFRAME & 0x00FF0000)>>16);
-        pkt_buf[data_length+10] = (byte) ((ENDFRAME & 0x0000FF00)>>8);
-        pkt_buf[data_length+11] = (byte) (ENDFRAME & 0x000000FF);
+        // consider Byte order
+        pkt_buf[1] = (byte) ((STARTFRAME & 0xFF00)>>8);
+        pkt_buf[0] = (byte) (STARTFRAME & 0x00FF);
+
+        // consider Byte order
+        pkt_buf[7] = (byte) ((data_length & 0xFF00)>>8);
+        pkt_buf[6] = (byte) (data_length & 0xFF);
+
+        // consider Byte order
+        pkt_buf[data_length+11] = (byte) ((ENDFRAME & 0xFF000000)>>24);
+        pkt_buf[data_length+10] = (byte) ((ENDFRAME & 0x00FF0000)>>16);
+        pkt_buf[data_length+9] = (byte) ((ENDFRAME & 0x0000FF00)>>8);
+        pkt_buf[data_length+8] = (byte) (ENDFRAME & 0x000000FF);
     }
 
     public void setSender(byte sender) {
@@ -40,8 +45,8 @@ public class TR_packet {
 
     public void setmID(char mID) {
         this.mID = mID;
-        pkt_buf[4] = (byte) ((mID & 0xFF00)>>8);
-        pkt_buf[5] = (byte) (mID & 0xFF);
+        pkt_buf[5] = (byte) ((mID & 0xFF00)>>8);
+        pkt_buf[4] = (byte) (mID & 0xFF);
     }
 
     public void setData(byte[] data) {
