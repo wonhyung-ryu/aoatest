@@ -21,6 +21,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import static java.util.Collections.swap;
+
 public class MainActivity extends AppCompatActivity implements Runnable {
 
     String res_buf = new String();
@@ -57,40 +59,44 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         Button mBTN_S1=(Button)findViewById(R.id.BTN_S1);
         mBTN_S1.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                makeData();
-                //result_win_log("SEND 1", true);
+                TPDV_HMS_HVAC_CONTROL tmp = new TPDV_HMS_HVAC_CONTROL();
+                tmp.setDriverTemp((byte) 21);
+                tmp.setRearDefrost((byte)1);
+                tmp.setFrontDefrost((byte)0);
+                tmp.setAuto((byte)1);
+                tmp.setSeatHeat((byte)1);
+                tmp.setAC((byte)0);
+                tmp.setAirFlow((byte)0x02);
+                tmp.setFanSpeed((byte)4);
+                tmp.setPassengerTemp((byte)20);
+
+                sendCommand(tmp.getPacket());
+                Log.i(TAG, "SEND : ");
+                for (int k1 = 0; k1<9+12; k1++) {
+                    Log.i(TAG, "0x" + toHexString(tmp.getPacket()[k1]) + " ");
+                }
             }
         });
-/*
+
         Button mBTN_S2=(Button)findViewById(R.id.BTN_S2);
         mBTN_S2.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
+                TPCR_HMS_HVAC_CONTROL tmp = new TPCR_HMS_HVAC_CONTROL();
+                tmp.setDriverTemp((byte) 21);
+                tmp.setRearDefrost((byte)1);
+                tmp.setFrontDefrost((byte)0);
+                tmp.setAuto((byte)1);
+                tmp.setSeatHeat((byte)1);
+                tmp.setAC((byte)0);
+                tmp.setAirFlow((byte)0x02);
+                tmp.setFanSpeed((byte)4);
+                tmp.setPassengerTemp((byte)20);
 
-                byte []buf = {(byte) 0x11, (byte) 0x43, (byte) 0xA1, (byte) 0x32, (byte) 0x24, (byte) 0x07, (byte) 0xB4, (byte) 0xFC,(byte) 0x43, (byte) 0xBC};
-
-                TR_packet transPkt = new TR_packet();
-
-                transPkt.packet_init((char)buf.length);
-                transPkt.setSender(transPkt.ID_DM);
-                transPkt.setReceiver(transPkt.ID_ALL);
-                transPkt.setmID((char)0x44);
-                transPkt.setData(buf);
-
-                Log.i(TAG, "Tx data: " + byteArrayToHex(transPkt.getPkt_buf()));
-
-                RCV_packet rPkt = new RCV_packet();
-                int err = rPkt.pktParse(transPkt.getPkt_buf());
-                if (err != 0) {
-                    Log.i(TAG, "Receive ERROR : "+err);
-                    for (int k = 0; k<buf.length+12; k++) {
-                        Log.d(TAG,"0x" + toHexString(transPkt.getPkt_buf()[k]) + " ");
-                    }
+                sendCommand(tmp.getPacket());
+                Log.i(TAG, "SEND : ");
+                for (int k1 = 0; k1<9+12; k1++) {
+                    Log.i(TAG, "0x" + toHexString(tmp.getPacket()[k1]) + " ");
                 }
-                result_win_log( "STARTFRAME "+ (rPkt.getSTARTFRAME()&0xFFFF),true);
-                result_win_log( "Sender "+ new Byte(rPkt.getSender()).toString(),true);
-                result_win_log( "Receiver "+ new Byte(rPkt.getReceiver()).toString(),true);
-                result_win_log( "mID "+ (rPkt.getmID()&0xFFFF),true);
-                result_win_log( "ENDFRAME "+ (rPkt.getENDFRAME()&0xFFFFFFFF),true);
 
             }
         });
@@ -98,9 +104,19 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         Button mBTN_S3=(Button)findViewById(R.id.BTN_S3);
         mBTN_S3.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                makeData();
+                TPDV_HMS_CHANGE_DEST trs = new TPDV_HMS_CHANGE_DEST();
+
+                trs.setLatitude((double)3.1415926);
+                trs.setLongitude((double)0x10);
+                trs.setPOIName("0123456789  0123456789");
+                sendCommand(trs.getPacket());
+
+                Log.i(TAG, "SEND : ");
+                for (int k1 = 0; k1<92; k1++) {
+                    Log.i(TAG, "0x" + toHexString(trs.getPacket()[k1]) + " ");
+                }
             }
-        });*/
+        });
     }
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
@@ -233,25 +249,6 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         val *= 256;
         val += (int) lo & 0xff;
         return val;
-    }
-
-    // Transfer Example Code
-    void makeData () {
-        byte []buf = {(byte) 26, (byte) 24, (byte) 3, (byte) 0x02, (byte) 0x01,
-                        (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0};
-
-        TR_packet transPkt = new TR_packet();
-
-        transPkt.packet_init((char)10);
-        transPkt.setSender(transPkt.ID_TPDV);
-        transPkt.setReceiver(transPkt.ID_TPCR);
-        transPkt.setmID((char)0x02);
-        transPkt.setData(buf);
-
-        for (int k1 = 0; k1<12+10; k1++) {
-            result_win_log("0x" + toHexString(transPkt.getPkt_buf()[k1]) + " ", false);
-        }
-        sendCommand(transPkt.getPkt_buf());
     }
 
     public void sendCommand(byte[] buffer) {
