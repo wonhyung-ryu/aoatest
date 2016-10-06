@@ -2,6 +2,9 @@ package com.example.wonhyungryu.aoatest2;
 
 import android.util.Log;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 /**
  * Created by wonhyung.ryu on 2016-10-04.
  */
@@ -26,13 +29,20 @@ public class Tx_Packet {
         output[3+offset] = (byte) ((input&0xFF000000) >> 24);
     }
 
+    public void floatToBytes_LE(float input, byte[] output , int offset ) {
+        byte[] tmp = new byte[4];
+        tmp = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putFloat(input).array();
+        for (int i=0; i<4 ; i++){
+            output[offset+i] = tmp[i];
+        }
+    }
+
     public void doubleToBytes_LE(double input, byte[] output, int offset  ) {
         long bits = Double.doubleToLongBits(input);
 
         for(int i = 0; i < 8; i++) {
             output[i + offset] = (byte) ((bits >> (i * 8)) & 0xff);
         }
-
     }
 
     public static final byte senderAddr = 2;

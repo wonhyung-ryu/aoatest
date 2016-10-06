@@ -12,7 +12,7 @@ public class TPDV_HMS_CHANGE_DEST extends Tx_Packet {
 
     private double latitude;
     private double longitude;
-    private char[] POIName = new char[64];
+    private char[] POIName = new char[32];
 
     private byte [] data = new byte[TPDV_HMS_CHANGE_DEST_dataLen+12];
 
@@ -48,7 +48,7 @@ public class TPDV_HMS_CHANGE_DEST extends Tx_Packet {
     }
 
     public void setPOIName(String sPOIName) {
-        if (sPOIName.length() > 64) return;
+        if (sPOIName.length() > 64/2) return;
 
         POIName = sPOIName.toCharArray();
         for (int i=0; i<sPOIName.length(); i++) {
