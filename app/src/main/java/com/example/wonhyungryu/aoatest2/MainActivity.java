@@ -141,6 +141,17 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 Log.i(TAG, "cc="+ String.valueOf(cc));
                 Log.i(TAG, "dd="+ String.valueOf(dd));
 
+                char[] ca = new char[]{'한','글','도','잘','되','나'};
+                byte[] darr = new byte[20];
+                Tx_Packet tt3 = new Tx_Packet();
+                for (int i=0; i< 6; i++) {
+                    tt3.charToBytes_LE(ca[i], darr, 2+i*2);
+                }
+                Log.i(TAG, "ca="+ String.valueOf(ca));
+                Log.i(TAG, "ca="+ byteArrayToHex(darr));
+
+                Log.i(TAG, "ca="+String.valueOf(rr2.byteToCharArray_LE(darr, 2, 12)));
+
             }
         });
     }
