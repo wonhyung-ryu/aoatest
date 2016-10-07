@@ -14,5 +14,5 @@
      limitations under the License.
 -->
 <resources>
-    <usb-accessory manufacturer="LGE, Inc." model="cockpit-2025" version="1.0" />
+    <usb-accessory manufacturer="LGE, Inc." model="cockpit-2025" version="2.0" />
 </resources>
