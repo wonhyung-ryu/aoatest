@@ -52,52 +52,45 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             openAccessory(mAccessory);
         }
 
-        Button mBTN_S1=(Button)findViewById(R.id.BTN_S1);
+        Button mBTN_S1 = (Button) findViewById(R.id.BTN_S1);
         mBTN_S1.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 TPDV_HMS_HVAC_CONTROL tmp = new TPDV_HMS_HVAC_CONTROL();
                 tmp.setDriverTemp((byte) 21);
-                tmp.setRearDefrost((byte)1);
-                tmp.setFrontDefrost((byte)0);
-                tmp.setAuto((byte)1);
-                tmp.setSeatHeat((byte)1);
-                tmp.setAC((byte)0);
-                tmp.setAirFlow((byte)0x02);
-                tmp.setFanSpeed((byte)4);
-                tmp.setPassengerTemp((byte)20);
+                tmp.setRearDefrost((byte) 1);
+                tmp.setFrontDefrost((byte) 0);
+                tmp.setAuto((byte) 1);
+                tmp.setDriverSeatHeat((byte) 1);
+                tmp.setPassengerSeatHeat((byte) 0);
+                tmp.setAC((byte) 0);
+                tmp.setAirFlow((byte) 0x02);
+                tmp.setFanSpeed((byte) 4);
+                tmp.setPassengerTemp((byte) 10);
 
                 sendCommand(tmp.getPacket());
-                Log.i(TAG, "SEND : ");
-                for (int k1 = 0; k1<9+12; k1++) {
-                    Log.i(TAG, "0x" + toHexString(tmp.getPacket()[k1]) + " ");
-                }
             }
         });
 
-        Button mBTN_S2=(Button)findViewById(R.id.BTN_S2);
+        Button mBTN_S2 = (Button) findViewById(R.id.BTN_S2);
         mBTN_S2.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 TPCR_HMS_HVAC_CONTROL tmp = new TPCR_HMS_HVAC_CONTROL();
                 tmp.setDriverTemp((byte) 21);
-                tmp.setRearDefrost((byte)1);
-                tmp.setFrontDefrost((byte)0);
-                tmp.setAuto((byte)1);
-                tmp.setSeatHeat((byte)1);
-                tmp.setAC((byte)0);
-                tmp.setAirFlow((byte)0x02);
-                tmp.setFanSpeed((byte)4);
-                tmp.setPassengerTemp((byte)20);
+                tmp.setRearDefrost((byte) 1);
+                tmp.setFrontDefrost((byte) 0);
+                tmp.setAuto((byte) 1);
+                tmp.setDriverSeatHeat((byte) 1);
+                tmp.setPassengerSeatHeat((byte) 0);
+                tmp.setAC((byte) 0);
+                tmp.setAirFlow((byte) 0x02);
+                tmp.setFanSpeed((byte) 4);
+                tmp.setPassengerTemp((byte) 20);
 
                 sendCommand(tmp.getPacket());
-                Log.i(TAG, "SEND : ");
-                for (int k1 = 0; k1<9+12; k1++) {
-                    Log.i(TAG, "0x" + toHexString(tmp.getPacket()[k1]) + " ");
-                }
-
             }
         });
 
-        Button mBTN_S3=(Button)findViewById(R.id.BTN_S3);
+        Button mBTN_S3 = (Button) findViewById(R.id.BTN_S3);
         mBTN_S3.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
 /*
@@ -107,14 +100,9 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 trs.setLongitude((double)0x10);
                 trs.setPOIName("서울시성북구 Seoul SungBokGu 012345678");
                 sendCommand(trs.getPacket());
-
-                Log.i(TAG, "SEND : ");
-                for (int k1 = 0; k1<92; k1++) {
-                    Log.i(TAG, "0x" + toHexString(trs.getPacket()[k1]) + " ");
-                }
                 */
-                double aa= 3.141592642;
-                double bb=0;
+                double aa = 3.141592642;
+                double bb = 0;
 
                 byte[] barr = new byte[10];
                 Tx_Packet tt = new Tx_Packet();
@@ -124,11 +112,11 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 conversion_LE rr = new conversion_LE();
                 bb = rr.byteToDouble_LE(barr, 1);
 
-                Log.i(TAG, "aa="+ String.valueOf(aa));
-                Log.i(TAG, "bb="+ String.valueOf(bb));
+                Log.i(TAG, "aa=" + String.valueOf(aa));
+                Log.i(TAG, "bb=" + String.valueOf(bb));
 
-                float cc= 3.1592642F;
-                float dd=0;
+                float cc = 3.1592642F;
+                float dd = 0;
 
                 byte[] carr = new byte[10];
                 Tx_Packet tt2 = new Tx_Packet();
@@ -138,19 +126,19 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 conversion_LE rr2 = new conversion_LE();
                 dd = rr2.byteToFloat_LE(carr, 1);
 
-                Log.i(TAG, "cc="+ String.valueOf(cc));
-                Log.i(TAG, "dd="+ String.valueOf(dd));
+                Log.i(TAG, "cc=" + String.valueOf(cc));
+                Log.i(TAG, "dd=" + String.valueOf(dd));
 
-                char[] ca = new char[]{'한','글','도','잘','되','나'};
+                char[] ca = new char[]{'한', '글', '도', '잘', '되', '나'};
                 byte[] darr = new byte[20];
                 Tx_Packet tt3 = new Tx_Packet();
-                for (int i=0; i< 6; i++) {
-                    tt3.charToBytes_LE(ca[i], darr, 2+i*2);
+                for (int i = 0; i < 6; i++) {
+                    tt3.charToBytes_LE(ca[i], darr, 2 + i * 2);
                 }
-                Log.i(TAG, "ca="+ String.valueOf(ca));
-                Log.i(TAG, "ca="+ byteArrayToHex(darr));
+                Log.i(TAG, "ca=" + String.valueOf(ca));
+                Log.i(TAG, "ca=" + byteArrayToHex(darr));
 
-                Log.i(TAG, "ca="+String.valueOf(rr2.byteToCharArray_LE(darr, 2, 12)));
+                Log.i(TAG, "ca=" + String.valueOf(rr2.byteToCharArray_LE(darr, 2, 12)));
 
             }
         });
@@ -256,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         while (ret >= 0) {
             try {
                 ret = mInputStream.read(buffer);
-                Log.d(TAG, "mInputStream.read : "+ ret);
+                Log.d(TAG, "mInputStream.read : " + ret);
                 Log.d(TAG, "Rx data: " + byteArrayToHex(buffer));
             } catch (IOException e) {
                 break;
@@ -271,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                         Log.d(TAG, "0x" + toHexString(buffer[k]) + " ");
                     }
                 }
-                if (rPkt.getSender() == RCV_packet.ID_CM){
+                if (rPkt.getSender() == RCV_packet.ID_CM) {
                     switch (rPkt.getmID()) {
                         case RCV_packet.HMS_COMMON_SURROUNDING_VEHICLE_INFO:
                             rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO rd1 = new rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO(rPkt.getData());
@@ -337,10 +325,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                         default:
                             Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
                             break;
-
                     }
-
-                        break;
                 } else if (rPkt.getSender() == RCV_packet.ID_TPCR) {
                     switch (rPkt.getmID()) {
                         case RCV_packet.TPCR_HMS_HVAC_CONTROL:
@@ -348,8 +333,9 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                             Log.i(TAG, "rcv_TPCR_HMS_HVAC_CONTROL.getPassengerTemp " + String.valueOf(rd1.getPassengerTemp()));
                             break;
 
-
-
+                        default:
+                            Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                            break;
                     }
                 } else if (rPkt.getSender() == RCV_packet.ID_TPDV) {
                     switch (rPkt.getmID()) {
@@ -357,12 +343,20 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                             rcv_TPDV_HMS_HVAC_CONTROL rd1 = new rcv_TPDV_HMS_HVAC_CONTROL(rPkt.getData());
                             Log.i(TAG, "rcv_TPDV_HMS_HVAC_CONTROL.getPassengerTemp " + String.valueOf(rd1.getPassengerTemp()));
                             break;
+
+                        default:
+                            Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                            break;
                     }
                 } else if (rPkt.getSender() == RCV_packet.ID_SM) {
                     switch (rPkt.getmID()) {
                         case RCV_packet.HMS_COMMON_MUSIC_INFO:
                             rcv_HMS_COMMON_MUSIC_INFO rd1 = new rcv_HMS_COMMON_MUSIC_INFO(rPkt.getData());
                             Log.i(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getTitle " + String.valueOf(rd1.getTitle()));
+                            break;
+
+                        default:
+                            Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
                             break;
                     }
                 } else if (rPkt.getSender() == RCV_packet.ID_VM) {
@@ -376,7 +370,9 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                             rcv_HMS_COMMON_DISPLAY_DANGER_ALARM rd2 = new rcv_HMS_COMMON_DISPLAY_DANGER_ALARM(rPkt.getData());
                             Log.i(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getInterval " + String.valueOf(rd2.getInterval()));
                             break;
-
+                        default:
+                            Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                            break;
                     }
                 } else {
                     switch (rPkt.getmID()) {
@@ -394,18 +390,16 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                             rcv_HMS_TPDV_DISPLAY_CURR_MAP rd3 = new rcv_HMS_TPDV_DISPLAY_CURR_MAP(rPkt.getData());
                             Log.i(TAG, "rcv_HMS_TPDV_DISPLAY_CURR_MAP.getLatitude " + String.valueOf(rd3.getLatitude()));
                             break;
+
+                        default:
+                            Log.i(TAG, "What?? sender = " + String.valueOf(rPkt.getSender()));
+                            Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                            break;
                     }
                 }
             }
 
         }
-    }
-
-    private int composeInt(byte hi, byte lo) {
-        int val = (int) hi & 0xff;
-        val *= 256;
-        val += (int) lo & 0xff;
-        return val;
     }
 
     public void sendCommand(byte[] buffer) {
@@ -415,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 mOutputStream.write(buffer);
             } catch (IOException e) {
                 Log.e(TAG, "write failed", e);
-                result_win_log("Write failed",true);
+                result_win_log("Write failed", true);
             }
         }
     }
@@ -433,13 +427,14 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
     String res_buf = new String();
     int result_line = 0;
-    private void result_win_log (String lmsg, boolean yn) {
+
+    private void result_win_log(String lmsg, boolean yn) {
         TextView mResult = (TextView) findViewById(R.id.result);
         if (result_line >= 25) {
             result_line = 0;
             mResult.setText("");
         }
-        if (yn){
+        if (yn) {
             res_buf = mResult.getText().toString() + "\n" + lmsg;
             result_line += 1;
         } else {
@@ -459,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         buf[0] = digits[(b >> 4) & 0xf];
         buf[1] = digits[b & 0xf];
 
-        return new String(buf, 0 ,2);
+        return new String(buf, 0, 2);
     }
 
 }

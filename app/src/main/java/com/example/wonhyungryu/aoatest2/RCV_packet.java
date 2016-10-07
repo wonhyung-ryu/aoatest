@@ -110,9 +110,10 @@ public class RCV_packet {
     public static final byte ID_HMS = 0x13; // HMS
     public static final byte ID_ALL = (byte) 0xFF; // ALL
 
-
-    public static final byte TPCR_HMS_HVAC_CONTROL = 0x04;
+    // message ID
     public static final byte TPDV_HMS_HVAC_CONTROL = 0x02;
+    public static final byte TPCR_HMS_HVAC_CONTROL = 0x04;
+
     public static final byte HMS_COMMON_NAVI_GUIDANCE_INFO = 0x05;
     public static final byte HMS_COMMON_AUTONOMOUS_DRIVING = 0x08;
     public static final byte HMS_COMMON_MANUAL_DRIVING = 0x09;
@@ -127,8 +128,17 @@ public class RCV_packet {
     public static final byte HMS_COMMON_DISPLAY_DANGER_INFO = 0x13;
     public static final byte HMS_COMMON_DISPLAY_DANGER_ALARM = 0x14;
     public static final byte HMS_COMMON_GPS_INFO = 0x15;
+
     public static final byte HMS_TPDV_DISPLAY_GOAL_MAP = 0x16;
     public static final byte HMS_TPDV_DISPLAY_CURR_MAP = 0x17;
+
+    public static final byte HMS_COMMON_STEERINGWHEEL_CONTROL = 0x01;
+    public static final byte HMS_COMMON_JOGDIAL_CONTROL = 0x02;
+    public static final byte HMS_COMMON_SYSTEM_CHECKING = 0x03;
+    public static final byte HMS_COMMON_DRIVING_INFO = 0x04;
+    public static final byte HMS_COMMON_NAVI_GUIDANCE_STARTED = 0x06;
+    public static final byte HMS_COMMON_NAVI_GUIDANCE_FINISHED = 0x07;
+    public static final byte HMS_COMMON_DRIVER_INFO = 0x0B;
 
 }
 
@@ -414,7 +424,8 @@ class rcv_HMS_COMMON_HVAC_INFO {
     private byte FanSpeed; // 1~5
     private byte AirFlow; // "0x01 : Center        0x02 : Center & Foot   0x03 : Foot  0x04 : Defrost & Foot"
     private byte AC; // "0x01 : On            0x00 : Off"
-    private byte SeatHeat; // "0x01 : On            0x00 : Off"
+    private byte DriverSeatHeat; // "0x01 : On            0x00 : Off"
+    private byte PassengerSeatHeat; // "0x01 : On            0x00 : Off"
     private byte Auto; // "0x01 : On            0x00 : Off"
     private byte FrontDefrost; // "0x01 : On            0x00 : Off"
     private byte RearDefrost; // "0x01 : On            0x00 : Off"
@@ -425,10 +436,11 @@ class rcv_HMS_COMMON_HVAC_INFO {
         FanSpeed = data[2];
         AirFlow = data[3];
         AC = data[4];
-        SeatHeat = data[5];
-        Auto = data[6];
-        FrontDefrost = data[7];
-        RearDefrost = data[8];
+        DriverSeatHeat = data[5];
+        PassengerSeatHeat = data[6];
+        Auto = data[7];
+        FrontDefrost = data[8];
+        RearDefrost = data[9];
     }
 
     public byte getDriverTemp() {
@@ -446,8 +458,11 @@ class rcv_HMS_COMMON_HVAC_INFO {
     public byte getAC() {
         return AC;
     }
-    public byte getSeatHeat() {
-        return SeatHeat;
+    public byte getDriverSeatHeat() {
+        return DriverSeatHeat;
+    }
+    public byte getPassengerSeatHeat() {
+        return PassengerSeatHeat;
     }
     public byte getAuto() {
         return Auto;
@@ -466,7 +481,8 @@ class rcv_TPCR_HMS_HVAC_CONTROL {
     private byte FanSpeed; // 1~5
     private byte AirFlow; // "0x01 : Center        0x02 : Center & Foot   0x03 : Foot  0x04 : Defrost & Foot"
     private byte AC; // "0x01 : On            0x00 : Off"
-    private byte SeatHeat; // "0x01 : On            0x00 : Off"
+    private byte DriverSeatHeat; // "0x01 : On            0x00 : Off"
+    private byte PassengerSeatHeat; // "0x01 : On            0x00 : Off"
     private byte Auto; // "0x01 : On            0x00 : Off"
     private byte FrontDefrost; // "0x01 : On            0x00 : Off"
     private byte RearDefrost; // "0x01 : On            0x00 : Off"
@@ -477,10 +493,11 @@ class rcv_TPCR_HMS_HVAC_CONTROL {
         FanSpeed = data[2];
         AirFlow = data[3];
         AC = data[4];
-        SeatHeat = data[5];
-        Auto = data[6];
-        FrontDefrost = data[7];
-        RearDefrost = data[8];
+        DriverSeatHeat = data[5];
+        PassengerSeatHeat = data[6];
+        Auto = data[7];
+        FrontDefrost = data[8];
+        RearDefrost = data[9];
     }
 
     public byte getDriverTemp() {
@@ -498,8 +515,11 @@ class rcv_TPCR_HMS_HVAC_CONTROL {
     public byte getAC() {
         return AC;
     }
-    public byte getSeatHeat() {
-        return SeatHeat;
+    public byte getDriverSeatHeat() {
+        return DriverSeatHeat;
+    }
+    public byte getPassengerSeatHeat() {
+        return PassengerSeatHeat;
     }
     public byte getAuto() {
         return Auto;
@@ -518,7 +538,8 @@ class rcv_TPDV_HMS_HVAC_CONTROL{
     private byte FanSpeed; // 1~5
     private byte AirFlow; // "0x01 : Center        0x02 : Center & Foot   0x03 : Foot  0x04 : Defrost & Foot"
     private byte AC; // "0x01 : On            0x00 : Off"
-    private byte SeatHeat; // "0x01 : On            0x00 : Off"
+    private byte DriverSeatHeat; // "0x01 : On            0x00 : Off"
+    private byte PassengerSeatHeat; // "0x01 : On            0x00 : Off"
     private byte Auto; // "0x01 : On            0x00 : Off"
     private byte FrontDefrost; // "0x01 : On            0x00 : Off"
     private byte RearDefrost; // "0x01 : On            0x00 : Off"
@@ -529,10 +550,11 @@ class rcv_TPDV_HMS_HVAC_CONTROL{
         FanSpeed = data[2];
         AirFlow = data[3];
         AC = data[4];
-        SeatHeat = data[5];
-        Auto = data[6];
-        FrontDefrost = data[7];
-        RearDefrost = data[8];
+        DriverSeatHeat = data[5];
+        PassengerSeatHeat = data[6];
+        Auto = data[7];
+        FrontDefrost = data[8];
+        RearDefrost = data[9];
     }
 
     public byte getDriverTemp() {
@@ -550,8 +572,11 @@ class rcv_TPDV_HMS_HVAC_CONTROL{
     public byte getAC() {
         return AC;
     }
-    public byte getSeatHeat() {
-        return SeatHeat;
+    public byte getDriverSeatHeat() {
+        return DriverSeatHeat;
+    }
+    public byte getPassengerSeatHeat() {
+        return PassengerSeatHeat;
     }
     public byte getAuto() {
         return Auto;

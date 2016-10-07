@@ -6,14 +6,15 @@ package com.example.wonhyungryu.aoatest2;
 
 public class TPDV_HMS_HVAC_CONTROL extends Tx_Packet{
 
-    private char TPDV_HMS_HVAC_CONTROL_dataLen = 9;
+    private char TPDV_HMS_HVAC_CONTROL_dataLen = 10;
 
     private byte DriverTemp;
     private byte PassengerTemp;
     private byte FanSpeed;
     private byte AirFlow;
     private byte AC;
-    private byte SeatHeat;
+    private byte DriverSeatHeat;
+    private byte PassengerSeatHeat;
     private byte Auto;
     private byte FrontDefrost;
     private byte RearDefrost;
@@ -68,20 +69,23 @@ public class TPDV_HMS_HVAC_CONTROL extends Tx_Packet{
     }
 
     //"0x01 : On     0x00 : Off"
-    public void setSeatHeat(byte seatHeat) {
-        data[dataAddr+5] = seatHeat;
+    public void setDriverSeatHeat(byte DseatHeat) {
+        data[dataAddr+5] = DseatHeat;
+    }
+    public void setPassengerSeatHeat(byte PseatHeat) {
+        data[dataAddr+6] = PseatHeat;
     }
     //"0x01 : On     0x00 : Off"
     public void setAuto(byte auto) {
-        data[dataAddr+6] = auto;
+        data[dataAddr+7] = auto;
     }
     //"0x01 : On     0x00 : Off"
     public void setFrontDefrost(byte frontDefrost) {
-        data[dataAddr+7] = frontDefrost;
+        data[dataAddr+8] = frontDefrost;
     }
     //"0x01 : On     0x00 : Off"
     public void setRearDefrost(byte rearDefrost) {
-        data[dataAddr+8] = rearDefrost;
+        data[dataAddr+9] = rearDefrost;
     }
 
     public byte[] getPacket(){
