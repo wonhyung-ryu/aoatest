@@ -12,6 +12,10 @@ public class conversion_LE {
         return (char)(((input[offset+1]&0xFF)<<8) + (input[offset]&0xFF));
     }
 
+    public short byteToShort_LE(byte[] input, int offset ) {
+        return (short)(((input[offset+1]&0xFF)<<8) + (input[offset]&0xFF));
+    }
+
     public int byteToInt_LE(byte[] input, int offset ) {
         return (int)(((input[offset+3]&0xFF)<<24)+((input[offset+2]&0xFF)<<16)+((input[offset+1]&0xFF)<<8)+(input[offset+0]&0xFF));
     }
@@ -26,6 +30,12 @@ public class conversion_LE {
         byte[] tmp = new byte[8];
         System.arraycopy(input, offset, tmp, 0, 8);
         return ByteBuffer.wrap(tmp).order(ByteOrder.LITTLE_ENDIAN ).getDouble();
+    }
+
+    public double byteTolong_LE (byte[] input, int offset ) {
+        byte[] tmp = new byte[8];
+        System.arraycopy(input, offset, tmp, 0, 8);
+        return ByteBuffer.wrap(tmp).order(ByteOrder.LITTLE_ENDIAN ).getLong();
     }
 
     public char[] byteToCharArray_LE(byte[] input, int offset, int length_byte){

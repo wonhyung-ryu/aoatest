@@ -2,6 +2,8 @@ package com.example.wonhyungryu.aoatest2;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+
 /**
  * Created by wonhyung.ryu on 2016-09-29.
  */
@@ -20,33 +22,26 @@ public class RCV_packet {
     public char getSTARTFRAME() {
         return STARTFRAME;
     }
-
     public byte getSender() {
         return sender;
     }
-
     public byte getReceiver() {
         return receiver;
     }
-
     public char getmID() {
         return mID;
     }
-
     public byte[] getData() {
         return data;
     }
-
     public char getDlength() {
         return dlength;
     }
-
     public int getENDFRAME() {
         return ENDFRAME;
     }
 
     public int pktParse(byte[] buf) {
-
         conversion_LE cle = new conversion_LE();
         STARTFRAME = cle.byteToChar_LE(buf, 0);
         if(STARTFRAME != 0xDD){
@@ -63,10 +58,10 @@ public class RCV_packet {
         }
 
         mID = cle.byteToChar_LE(buf, mIDAddr);
-        Log.i(TAG, "mID : "+ mID);
+        Log.i(TAG, "mID : "+ (int)mID);
 
         dlength = cle.byteToChar_LE(buf, datalenAddr);
-        Log.i(TAG, "data length : "+ dlength);
+        Log.i(TAG, "data length : "+ (int)dlength);
 
         data = new byte[dlength];
         System.arraycopy(buf, 8, data, 0, dlength);
@@ -114,10 +109,17 @@ public class RCV_packet {
     public static final byte TPDV_HMS_HVAC_CONTROL = 0x02;
     public static final byte TPCR_HMS_HVAC_CONTROL = 0x04;
 
+    public static final byte HMS_COMMON_STEERINGWHEEL_CONTROL = 0x01;
+    public static final byte HMS_COMMON_JOGDIAL_CONTROL = 0x02;
+    public static final byte HMS_COMMON_SYSTEM_CHECKING = 0x03;
+    public static final byte HMS_COMMON_DRIVING_INFO = 0x04;
     public static final byte HMS_COMMON_NAVI_GUIDANCE_INFO = 0x05;
+    public static final byte HMS_COMMON_NAVI_GUIDANCE_STARTED = 0x06;
+    public static final byte HMS_COMMON_NAVI_GUIDANCE_FINISHED = 0x07;
     public static final byte HMS_COMMON_AUTONOMOUS_DRIVING = 0x08;
     public static final byte HMS_COMMON_MANUAL_DRIVING = 0x09;
     public static final byte HMS_COMMON_MODE_READY_COUNTDOWN = 0x0A;
+    public static final byte HMS_COMMON_DRIVER_INFO = 0x0B;
     public static final byte HMS_COMMON_DRIVER_STATUS_INFO = 0x0C;
     public static final byte HMS_COMMON_SAFETY_LEVEL_INFO = 0x0D;
     public static final byte HMS_COMMON_SURROUNDING_VEHICLE_INFO = 0x0E;
@@ -131,127 +133,142 @@ public class RCV_packet {
 
     public static final byte HMS_TPDV_DISPLAY_GOAL_MAP = 0x16;
     public static final byte HMS_TPDV_DISPLAY_CURR_MAP = 0x17;
+}
 
-    public static final byte HMS_COMMON_STEERINGWHEEL_CONTROL = 0x01;
-    public static final byte HMS_COMMON_JOGDIAL_CONTROL = 0x02;
-    public static final byte HMS_COMMON_SYSTEM_CHECKING = 0x03;
-    public static final byte HMS_COMMON_DRIVING_INFO = 0x04;
-    public static final byte HMS_COMMON_NAVI_GUIDANCE_STARTED = 0x06;
-    public static final byte HMS_COMMON_NAVI_GUIDANCE_FINISHED = 0x07;
-    public static final byte HMS_COMMON_DRIVER_INFO = 0x0B;
-
+class SURROUNDING_VEHICLE_n_INFO{
+    public short VehicleId; // 타겟 ID
+    public short Type; // "타겟 타입 "0x02 : 정적 교통 표지판, 0x04 : 정적 물체, 0x08 : 정적 방해물, 0x10 : 동적 물체, 0x20 : 차량, 0x40 : 오토바이(자전거), 0x80 : 보행자 "
+    public float SensorId; // "센서 아이디            300000 : 전방    300001 : 전방    300002 : 후방    300003 : 측면    300004 : 측면    300005 : 측면    300006 : 측면"
+    public double Latitude; // 타겟 위도
+    public double Longitude; // 타겟 경도
+    public double Altitude; // 타겟 고도
+    public float Heading; // 타겟 방향
+    public float DistanceToCollision; // 자차와 타겟간의 직선 거리
+    public float AbsoluteSpeed; // 타겟 속도
+    public float RelativeSpeed; // 상대 속도
 }
 
 class rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO {
-    private char Count;
-    private char VehicleID;
-    private byte VehicleType; //"0x02 : 정적 교통 표지판, 0x04 : 정적 물체, 0x08 : 정적 방해물, 0x10 : 동적 물체, 0x20 : 차량, 0x40 : 오토바이(자전거), 0x80 : 보행자 "
-    private char[] VehicleName = new char [4];
-    private double VehicleLatitude;
-    private double VehicleLogitude;
-    private double VehicleAltitude;
-    private float VehicleHeading;
-    private float VehicleDistanceToCollision;	// 직선 거리
-    private float VehicleAbsoluteSpeed;
-    private float VehicleRelativeSpeed;
-    private char TargetID;	// 충동 예상 Vehicle ID
+    private short Count;
+    private short TargetID; // 충동 예상 Vehicle ID
+    ArrayList<SURROUNDING_VEHICLE_n_INFO> n_VEHICLE_INFO = new ArrayList<SURROUNDING_VEHICLE_n_INFO>();
+
+//    private short VehicleId; // 타겟 ID
+//    private short Type; // "타겟 타입 "0x02 : 정적 교통 표지판, 0x04 : 정적 물체, 0x08 : 정적 방해물, 0x10 : 동적 물체, 0x20 : 차량, 0x40 : 오토바이(자전거), 0x80 : 보행자 "
+//    private float SensorId; // "센서 아이디            300000 : 전방    300001 : 전방    300002 : 후방    300003 : 측면    300004 : 측면    300005 : 측면    300006 : 측면"
+//    private double Latitude; // 타겟 위도
+//    private double Longitude; // 타겟 경도
+//    private double Altitude; // 타겟 고도
+//    private float Heading; // 타겟 방향
+//    private float DistanceToCollision; // 자차와 타겟간의 직선 거리
+//    private float AbsoluteSpeed; // 타겟 속도
+//    private float RelativeSpeed; // 상대 속도
 
     rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO(byte[] data){
         conversion_LE kk = new conversion_LE();
         int offset = 0;
-        Count = kk.byteToChar_LE (data, offset); offset += 2;
-        VehicleID = kk.byteToChar_LE (data, offset); offset += 2;
-        VehicleType = data[offset];  offset += 1;
-        VehicleName = kk.byteToCharArray_LE(data, offset, 8); offset += 8;
-        VehicleLatitude = kk.byteToDouble_LE(data, offset); offset += 8;
-        VehicleLogitude = kk.byteToDouble_LE(data, offset); offset += 8;
-        VehicleAltitude = kk.byteToDouble_LE(data, offset); offset += 8;
-        VehicleHeading = kk.byteToFloat_LE(data, offset); offset += 4;
-        VehicleDistanceToCollision = kk.byteToFloat_LE(data, offset); offset += 4;
-        VehicleAbsoluteSpeed = kk.byteToFloat_LE(data, offset); offset += 4;
-        VehicleAbsoluteSpeed = kk.byteToFloat_LE(data, offset); offset += 4;
-        TargetID = kk.byteToChar_LE (data, offset);
+        //n_VEHICLE_INFO.clear();
+
+        Count = kk.byteToShort_LE(data, offset); offset += 2;
+        TargetID = kk.byteToShort_LE (data, offset); offset += 2;
+
+        if (Count != 0) {
+            for (int i = 0; i < Count; i++) {
+                SURROUNDING_VEHICLE_n_INFO n_info = new SURROUNDING_VEHICLE_n_INFO();
+
+                n_info.VehicleId = kk.byteToShort_LE(data, offset);                offset += 2;
+                n_info.Type = kk.byteToShort_LE(data, offset);                offset += 2;
+                n_info.SensorId = kk.byteToFloat_LE(data, offset);                offset += 4;
+                n_info.Latitude = kk.byteToDouble_LE(data, offset);                offset += 8;
+                n_info.Longitude = kk.byteToDouble_LE(data, offset);                offset += 8;
+                n_info.Altitude = kk.byteToDouble_LE(data, offset);                offset += 8;
+                n_info.Heading = kk.byteToFloat_LE(data, offset);                offset += 4;
+                n_info.DistanceToCollision = kk.byteToFloat_LE(data, offset);                offset += 4;
+                n_info.AbsoluteSpeed = kk.byteToFloat_LE(data, offset);                offset += 4;
+                n_info.RelativeSpeed = kk.byteToFloat_LE(data, offset);                offset += 4;
+
+                n_VEHICLE_INFO.add (n_info);
+            }
+        }
     }
 
-    public char getCount() {
+    public short getCount() {
         return Count;
     }
-    public char getVehicleID() {
-        return VehicleID;
-    }
-    public byte getVehicleType() {
-        return VehicleType;
-    }
-    public char[] getVehicleName() {
-        return VehicleName;
-    }
-    public double getVehicleLatitude() {
-        return VehicleLatitude;
-    }
-    public double getVehicleLogitude() {
-        return VehicleLogitude;
-    }
-    public double getVehicleAltitude() {
-        return VehicleAltitude;
-    }
-    public float getVehicleHeading() {
-        return VehicleHeading;
-    }
-    public float getVehicleDistanceToCollision() {
-        return VehicleDistanceToCollision;
-    }
-    public float getVehicleAbsoluteSpeed() {
-        return VehicleAbsoluteSpeed;
-    }
-    public float getVehicleRelativeSpeed() {
-        return VehicleRelativeSpeed;
-    }
-    public char getTargetID() {
+    public short getTargetID() {
         return TargetID;
+    }
+    public SURROUNDING_VEHICLE_n_INFO getSURROUNDING_VEHICLE_n_INFO (int n) {
+        return n_VEHICLE_INFO.get(n);
     }
 }
 
 class rcv_HMS_COMMON_SCENARIO_INFO {
-    private byte Rain; // "0x00 : 맑음            0x01 : 폭우"
-    private byte Snow; // "0x00 : 맑음            0x01 : 폭설"
-    private byte Fog; // "0x00 : 맑음            0x01 : 진한 안개"
-    private byte Cloud; // "0x00 : 맑음            0x01 : 폭풍구름"
-    private byte WaterOnRoad; // 도로 강수량 0 ~ 20mm
-    private byte SnowOnRoad; // 도로 강설량 0 ~ 20mm
-    private byte DayTime; // 0 ~ 24 시간
+    private float Rain; // "0x00 : 맑음            0x01 : 폭우"
+    private float Snow; // "0x00 : 맑음            0x01 : 폭설"
+    private float Fog; // "0x00 : 맑음            0x01 : 진한 안개"
+    private float Cloud; // "0x00 : 맑음            0x01 : 폭풍구름"
+    private float WaterOnRoad; // 도로 강수량 0 ~ 20mm
+    private float SnowOnRoad; // 도로 강설량 0 ~ 20mm
+    private float DayTime; // 0 ~ 24 시간
+    private int AutonomousRoad; // "0x00 수동주행 도로            0x01 자율주행 도로"
+    private int TransitionTime; // 6초 -> 0초 수동 -> 자율 모드 전환 시간
+    private int AutonomousMode; // "0x00 수동주행 모드            0x01 자율주행 모드"
+    private int IsTunnel; // "0x00 : 일반도로            0x01 : 터널구간"
+    private int stopTime; // "0초 -> 6초 터널내 사고발생지점에서 정차후    경과시간"
 
     rcv_HMS_COMMON_SCENARIO_INFO(byte[] data){
         conversion_LE kk = new conversion_LE();
         int offset = 0;
-        Rain = data[offset];  offset += 1;
-        Snow = data[offset];  offset += 1;
-        Fog = data[offset];  offset += 1;
-        Cloud = data[offset];  offset += 1;
-        WaterOnRoad = data[offset];  offset += 1;
-        SnowOnRoad = data[offset];  offset += 1;
-        DayTime = data[offset];
+        Rain = kk.byteToFloat_LE(data, offset); offset += 4;
+        Snow = kk.byteToFloat_LE(data, offset); offset += 4;
+        Fog = kk.byteToFloat_LE(data, offset); offset += 4;
+        Cloud = kk.byteToFloat_LE(data, offset); offset += 4;
+        WaterOnRoad = kk.byteToFloat_LE(data, offset); offset += 4;
+        SnowOnRoad = kk.byteToFloat_LE(data, offset); offset += 4;
+        DayTime = kk.byteToFloat_LE(data, offset); offset += 4;
+        AutonomousRoad = kk.byteToInt_LE(data, offset); offset += 4;
+        TransitionTime = kk.byteToInt_LE(data, offset); offset += 4;
+        AutonomousMode = kk.byteToInt_LE(data, offset); offset += 4;
+        IsTunnel = kk.byteToInt_LE(data, offset); offset += 4;
+        stopTime = kk.byteToInt_LE(data, offset); offset += 4;
     }
 
-    public byte getRain() {
+    public float getRain() {
         return Rain;
     }
-    public byte getSnow() {
+    public float getSnow() {
         return Snow;
     }
-    public byte getFog() {
+    public float getFog() {
         return Fog;
     }
-    public byte getCloud() {
+    public float getCloud() {
         return Cloud;
     }
-    public byte getWaterOnRoad() {
+    public float getWaterOnRoad() {
         return WaterOnRoad;
     }
-    public byte getSnowOnRoad() {
+    public float getSnowOnRoad() {
         return SnowOnRoad;
     }
-    public byte getDayTime() {
+    public float getDayTime() {
         return DayTime;
+    }
+    public int getAutonomousRoad() {
+        return AutonomousRoad;
+    }
+    public int getTransitionTime() {
+        return TransitionTime;
+    }
+    public int getAutonomousMode() {
+        return AutonomousMode;
+    }
+    public int getIsTunnel() {
+        return IsTunnel;
+    }
+    public int getStopTime() {
+        return stopTime;
     }
 }
 
@@ -286,8 +303,8 @@ class rcv_HMS_COMMON_RECOMMEND_DRIVING_GUIDE {
 
 class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
     private char Dist2Goal; // m
-    private int Time2Goal; // second
     private char Dist2GP; // m
+    private int Time2Goal; // second
     private int Time2GP; // second
     private char TotalDist; // m
     private byte TBTCode;
@@ -301,8 +318,8 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
         conversion_LE kk = new conversion_LE();
         int offset = 0;
         Dist2Goal = kk.byteToChar_LE (data, offset); offset += 2;
-        Time2Goal = kk.byteToInt_LE(data, offset); offset += 4;
         Dist2GP = kk.byteToChar_LE (data, offset); offset += 2;
+        Time2Goal = kk.byteToInt_LE(data, offset); offset += 4;
         Time2GP = kk.byteToInt_LE(data, offset); offset += 4;
         TotalDist = kk.byteToChar_LE (data, offset); offset += 2;
         TBTCode = data[offset]; offset += 1;
@@ -316,11 +333,11 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
     public char getDist2Goal() {
         return Dist2Goal;
     }
-    public int getTime2Goal() {
-        return Time2Goal;
-    }
     public char getDist2GP() {
         return Dist2GP;
+    }
+    public int getTime2Goal() {
+        return Time2Goal;
     }
     public int getTime2GP() {
         return Time2GP;
@@ -350,6 +367,9 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
 
 class rcv_HMS_COMMON_AUTONOMOUS_DRIVING {
     private byte Command; // "0x01 : 자율주행 시작 0x02 : 자율주행 종료"
+    private byte reserved1;
+    private byte reserved2;
+    private byte reserved3;
 
     rcv_HMS_COMMON_AUTONOMOUS_DRIVING(byte[] data){
         Command = data[0];
@@ -362,6 +382,9 @@ class rcv_HMS_COMMON_AUTONOMOUS_DRIVING {
 
 class rcv_HMS_COMMON_MANUAL_DRIVING {
     private byte Command; // "0x01 : 수동주행 시작 0x02 : 수동주행 종료"
+    private byte reserved1;
+    private byte reserved2;
+    private byte reserved3;
 
     rcv_HMS_COMMON_MANUAL_DRIVING(byte[] data){
         Command = data[0];
@@ -375,6 +398,8 @@ class rcv_HMS_COMMON_MANUAL_DRIVING {
 class rcv_HMS_COMMON_MODE_READY_COUNTDOWN {
     private byte Count; // 0~10
     private byte Mode; // "0x01 : 수동주행  0x02 : 자율주행"
+    private byte reserved1;
+    private byte reserved2;
 
     rcv_HMS_COMMON_MODE_READY_COUNTDOWN(byte[] data){
         Count = data[0];
@@ -392,6 +417,8 @@ class rcv_HMS_COMMON_MODE_READY_COUNTDOWN {
 class rcv_HMS_COMMON_DRIVER_STATUS_INFO {
     private byte Gaze;  // "0x01 : 전방주시 0x02 : 전방주시태만"
     private byte Sleep; // "0x01 : 정상     0x02 : 졸음  0x03 : 깊은 졸음"
+    private byte reserved1;
+    private byte reserved2;
 
     rcv_HMS_COMMON_DRIVER_STATUS_INFO(byte[] data){
         Gaze = data[0];
@@ -408,6 +435,9 @@ class rcv_HMS_COMMON_DRIVER_STATUS_INFO {
 
 class rcv_HMS_COMMON_SAFETY_LEVEL_INFO {
     private byte Level; // 0~4
+    private byte reserved1;
+    private byte reserved2;
+    private byte reserved3;
 
     rcv_HMS_COMMON_SAFETY_LEVEL_INFO(byte[] data){
         Level = data[0];
@@ -597,6 +627,8 @@ class rcv_HMS_COMMON_MUSIC_INFO {
     private float Position;
     private float Duration;
     private char Index;
+    private byte reserved1;
+    private byte reserved2;
 
     rcv_HMS_COMMON_MUSIC_INFO(byte[] data) {
         conversion_LE kk = new conversion_LE();
@@ -635,41 +667,48 @@ class rcv_HMS_COMMON_MUSIC_INFO {
 
 class rcv_HMS_COMMON_DISPLAY_DANGER_INFO{
     private byte IconCode; // "Icon 종류(TBD) 0x01 : 도로 상태 이상    0x02 : 날씨 변화    0x03 : 사고 발생    0x04 : 강제 수동 전환"
-    private char param; // Icon별 추가 정보
+    private byte param; // Icon별 추가 정보
+    private byte reserved1;
+    private byte reserved2;
 
     rcv_HMS_COMMON_DISPLAY_DANGER_INFO(byte[] data) {
         conversion_LE kk = new conversion_LE();
         int offset = 0;
         IconCode = data[offset];        offset += 1;
-        param = kk.byteToChar_LE(data, offset);
+        param = data[offset];
     }
 
     public byte getIconCode() {
         return IconCode;
     }
-    public char getParam() {
+    public byte getParam() {
         return param;
     }
 }
 
 class rcv_HMS_COMMON_DISPLAY_DANGER_ALARM{
     private char Display; // "0x01 : Display1, 0x02 : Display2, 0x04 : Display3, 0x08 : Display4, 0x10 : Display5, 0x20 : LED, 0x40 : ARHUD, 0x80 : LEFT SIDE MIRROR, 0x100 : RIGHT SIDE MIRROR"
-    private byte Sound; // "0x01 : 위험도 1             0x02 : 위험도 2            0x03 : 위험도 3"
+    private char Sound; // "0x01 : 위험도 1             0x02 : 위험도 2            0x03 : 위험도 3"
+    private char Haptic;
     private char Interval; // 표시 간격(ms)
 
     rcv_HMS_COMMON_DISPLAY_DANGER_ALARM(byte[] data) {
         conversion_LE kk = new conversion_LE();
         int offset = 0;
         Display = kk.byteToChar_LE(data, offset);        offset += 2;
-        Sound = data[offset];        offset += 1;
+        Sound = kk.byteToChar_LE(data, offset);        offset += 2;
+        Haptic = kk.byteToChar_LE(data, offset);        offset += 2;
         Interval = kk.byteToChar_LE(data, offset);
     }
 
     public char getDisplay() {
         return Display;
     }
-    public byte getSound() {
+    public char getSound() {
         return Sound;
+    }
+    public char getHaptic() {
+        return Haptic;
     }
     public char getInterval() {
         return Interval;
@@ -714,6 +753,9 @@ class rcv_HMS_TPDV_DISPLAY_GOAL_MAP{
     private double Latitude; // 표시용 목적지 위도
     private double Longitude; // 표시용 목적지 경도
     private byte GoalType;
+    private byte reserved1;
+    private byte reserved2;
+    private byte reserved3;
     private char[] Name = new char[32];
 
     rcv_HMS_TPDV_DISPLAY_GOAL_MAP(byte[] data) {
@@ -722,6 +764,9 @@ class rcv_HMS_TPDV_DISPLAY_GOAL_MAP{
         Latitude = kk.byteToDouble_LE(data, offset);        offset += 8;
         Longitude = kk.byteToDouble_LE(data, offset);        offset += 8;
         GoalType = data[offset];        offset += 1;
+        reserved1 = data[offset];        offset += 1;
+        reserved2 = data[offset];        offset += 1;
+        reserved3 = data[offset];        offset += 1;
         Name = kk.byteToCharArray_LE(data, offset, 64);
     }
 
@@ -758,6 +803,176 @@ class rcv_HMS_TPDV_DISPLAY_CURR_MAP{
     public double getLongitude() {
         return Longitude;
     }
+    public char[] getName() {
+        return Name;
+    }
+}
+
+class rcv_HMS_COMMON_STEERINGWHEEL_CONTROL{
+    byte Command;
+        /* "0x01 : VoiceRecognition
+            0x02 : 주행모드(수동/자율) 변경
+            0x03 : Volume Up
+            0x04 : Volume Down
+            0x05 : Mute
+            0x06 : Seek Up
+            0x07 : Seek Down
+            0x08 : Start Call
+            0x09 : End Call
+            0x0A : Main Menu Call
+            0x0B : Cruise
+            0x0C : Mode Up(위로 포커스 이동)
+            0x0D : Mode Down(아래로 포커스 이동)
+            0x0E : Mode OK
+            0x0F : RES+
+            0x10 : SET-
+            0x11 : Lane Keeping
+            0x12 : Cruise/Lane Keeping Cancel
+            0x13 : Paddle+
+            0x14 : Paddle-" */
+    byte Param; // "Command가 0x02인 경우.     0x01 : 수동주행    0x02 : 자율주행"
+    byte reserved1;
+    byte reserved2;
+
+    rcv_HMS_COMMON_STEERINGWHEEL_CONTROL(byte[] data) {
+        conversion_LE kk = new conversion_LE();
+        int offset = 0;
+        Command = data[offset];        offset += 1;
+        Param = data[offset];        offset += 1;
+    }
+
+    public byte getCommand() {
+        return Command;
+    }
+    public byte getParam() {
+        return Param;
+    }
+}
+
+class rcv_HMS_COMMON_JOGDIAL_CONTROL{
+    byte Command;
+    /* "    0x01 : Rotary Knob Right
+            0x02 : Rotary Knob Left
+            0x03 : Joystick Top
+            0x04 : Joystick Bottom
+            0x05 : Joystick Left
+            0x06 : Joystick Right
+            0x07 : Center Button
+            0x08 : Back Button
+            0x09 : Home Button
+            0x0A : DRIVE Button
+            0x0B : VIEW Button
+            0x0C : RELAX Button
+            0x0D : P Button
+            0x0E : D Button
+            0x0F : R Button
+            0x10 : Hand Gesture Left
+            0x11 : Hand Gesture Right
+            0x12 : Hand Gesture Hold
+            0x13 : Hand Gesture Click
+            0x14 : Hand Gesture Double Tab" */
+    byte Status; // "0x01 : Button Push            0x02 : Button Release"
+    byte reserved1;
+    byte reserved2;
+
+    rcv_HMS_COMMON_JOGDIAL_CONTROL(byte[] data) {
+        conversion_LE kk = new conversion_LE();
+        int offset = 0;
+        Command = data[offset];        offset += 1;
+        Status = data[offset];        offset += 1;
+    }
+
+    public byte getCommand() {
+        return Command;
+    }
+    public byte getStatus() {
+        return Status;
+    }
+}
+
+class rcv_HMS_COMMON_SYSTEM_CHECKING{
+    byte Command; // "0x01 : 시작            0x02 : 종료"
+    byte reserved1;
+    byte reserved2;
+    byte reserved3;
+
+    rcv_HMS_COMMON_SYSTEM_CHECKING(byte[] data) {
+        conversion_LE kk = new conversion_LE();
+        int offset = 0;
+        Command = data[offset];        offset += 1;
+    }
+
+    public byte getCommand() {
+        return Command;
+    }
+}
+
+class rcv_HMS_COMMON_DRIVING_INFO{
+    char PossibleDrivingDistance; // km
+    byte Speed; // 0~160km
+    byte Power; // 0~100%
+    byte Charge; // 0~150%
+    byte Gear; // "0x01 : P            0X02 : D    0X03 : R"
+    byte reserved1;
+    byte reserved2;
+
+    rcv_HMS_COMMON_DRIVING_INFO(byte[] data) {
+        conversion_LE kk = new conversion_LE();
+        int offset = 0;
+        PossibleDrivingDistance = kk.byteToChar_LE(data, offset);        offset += 2;
+        Speed = data[offset];        offset += 1;
+        Power = data[offset];        offset += 1;
+        Charge = data[offset];        offset += 1;
+        Gear = data[offset];        offset += 1;
+    }
+
+    public char getPossibleDrivingDistance() {
+        return PossibleDrivingDistance;
+    }
+    public byte getSpeed() {
+        return Speed;
+    }
+    public byte getPower() {
+        return Power;
+    }
+    public byte getCharge() {
+        return Charge;
+    }
+    public byte getGear() {
+        return Gear;
+    }
+}
+
+class rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED{
+
+
+    rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED(byte[] data) {
+        conversion_LE kk = new conversion_LE();
+        int offset = 0;
+
+    }
+}
+
+class rcv_HMS_COMMON_NAVI_GUIDANCE_FINISHED{
+
+
+    rcv_HMS_COMMON_NAVI_GUIDANCE_FINISHED(byte[] data) {
+        conversion_LE kk = new conversion_LE();
+        int offset = 0;
+
+    }
+}
+
+class rcv_HMS_COMMON_DRIVER_INFO{
+    char[] Name = new char[32]; // 운전자 이름
+
+
+    rcv_HMS_COMMON_DRIVER_INFO(byte[] data) {
+        conversion_LE kk = new conversion_LE();
+        int offset = 0;
+        Name = kk.byteToCharArray_LE(data, offset, 64);         offset += 64;
+    }
+
     public char[] getName() {
         return Name;
     }
