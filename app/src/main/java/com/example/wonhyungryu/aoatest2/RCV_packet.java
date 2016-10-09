@@ -153,21 +153,10 @@ class rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO {
     private short TargetID; // 충동 예상 Vehicle ID
     ArrayList<SURROUNDING_VEHICLE_n_INFO> n_VEHICLE_INFO = new ArrayList<SURROUNDING_VEHICLE_n_INFO>();
 
-//    private short VehicleId; // 타겟 ID
-//    private short Type; // "타겟 타입 "0x02 : 정적 교통 표지판, 0x04 : 정적 물체, 0x08 : 정적 방해물, 0x10 : 동적 물체, 0x20 : 차량, 0x40 : 오토바이(자전거), 0x80 : 보행자 "
-//    private float SensorId; // "센서 아이디            300000 : 전방    300001 : 전방    300002 : 후방    300003 : 측면    300004 : 측면    300005 : 측면    300006 : 측면"
-//    private double Latitude; // 타겟 위도
-//    private double Longitude; // 타겟 경도
-//    private double Altitude; // 타겟 고도
-//    private float Heading; // 타겟 방향
-//    private float DistanceToCollision; // 자차와 타겟간의 직선 거리
-//    private float AbsoluteSpeed; // 타겟 속도
-//    private float RelativeSpeed; // 상대 속도
-
     rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO(byte[] data){
         conversion_LE kk = new conversion_LE();
         int offset = 0;
-        //n_VEHICLE_INFO.clear();
+        n_VEHICLE_INFO.clear();
 
         Count = kk.byteToShort_LE(data, offset); offset += 2;
         TargetID = kk.byteToShort_LE (data, offset); offset += 2;
@@ -284,7 +273,7 @@ class rcv_HMS_COMMON_RECOMMEND_DRIVING_GUIDE {
         SpeedUp = data[offset];  offset += 1;
         SpeedDown = data[offset];  offset += 1;
         LaneChange2Left = data[offset];  offset += 1;
-        LaneChange2Right = data[offset];
+        LaneChange2Right = data[offset];  offset += 1;
     }
 
     public byte getSpeedUp() {
@@ -327,7 +316,7 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
         CurrentRoadName = kk.byteToCharArray_LE(data, offset, 64); offset += 64;
         DirectionRoadName = kk.byteToCharArray_LE(data, offset, 64); offset += 64;
         ADStartDistOffset = kk.byteToChar_LE(data, offset); offset += 2;
-        ADDist = kk.byteToChar_LE(data, offset);
+        ADDist = kk.byteToChar_LE(data, offset);  offset += 2;
     }
 
     public char getDist2Goal() {
@@ -402,8 +391,10 @@ class rcv_HMS_COMMON_MODE_READY_COUNTDOWN {
     private byte reserved2;
 
     rcv_HMS_COMMON_MODE_READY_COUNTDOWN(byte[] data){
-        Count = data[0];
-        Mode = data[1];
+        int offset = 0;
+
+        Count = data[offset];  offset += 1;
+        Mode = data[offset];  offset += 1;
     }
 
     public byte getCount() {
@@ -421,8 +412,10 @@ class rcv_HMS_COMMON_DRIVER_STATUS_INFO {
     private byte reserved2;
 
     rcv_HMS_COMMON_DRIVER_STATUS_INFO(byte[] data){
-        Gaze = data[0];
-        Sleep = data[1];
+        int offset = 0;
+
+        Gaze = data[offset];  offset += 1;
+        Sleep = data[offset];  offset += 1;
     }
 
     public byte getGaze() {
@@ -461,16 +454,18 @@ class rcv_HMS_COMMON_HVAC_INFO {
     private byte RearDefrost; // "0x01 : On            0x00 : Off"
 
     rcv_HMS_COMMON_HVAC_INFO(byte[] data){
-        DriverTemp = data[0];
-        PassengerTemp = data[1];
-        FanSpeed = data[2];
-        AirFlow = data[3];
-        AC = data[4];
-        DriverSeatHeat = data[5];
-        PassengerSeatHeat = data[6];
-        Auto = data[7];
-        FrontDefrost = data[8];
-        RearDefrost = data[9];
+        int offset = 0;
+
+        DriverTemp = data[offset];  offset += 1;
+        PassengerTemp = data[offset];  offset += 1;
+        FanSpeed = data[offset];  offset += 1;
+        AirFlow = data[offset];  offset += 1;
+        AC = data[offset];  offset += 1;
+        DriverSeatHeat = data[offset];  offset += 1;
+        PassengerSeatHeat = data[offset];  offset += 1;
+        Auto = data[offset];  offset += 1;
+        FrontDefrost = data[offset];  offset += 1;
+        RearDefrost = data[offset];  offset += 1;
     }
 
     public byte getDriverTemp() {
@@ -518,16 +513,18 @@ class rcv_TPCR_HMS_HVAC_CONTROL {
     private byte RearDefrost; // "0x01 : On            0x00 : Off"
 
     rcv_TPCR_HMS_HVAC_CONTROL(byte[] data){
-        DriverTemp = data[0];
-        PassengerTemp = data[1];
-        FanSpeed = data[2];
-        AirFlow = data[3];
-        AC = data[4];
-        DriverSeatHeat = data[5];
-        PassengerSeatHeat = data[6];
-        Auto = data[7];
-        FrontDefrost = data[8];
-        RearDefrost = data[9];
+        int offset = 0;
+
+        DriverTemp = data[offset];  offset += 1;
+        PassengerTemp = data[offset];  offset += 1;
+        FanSpeed = data[offset];  offset += 1;
+        AirFlow = data[offset];  offset += 1;
+        AC = data[offset];  offset += 1;
+        DriverSeatHeat = data[offset];  offset += 1;
+        PassengerSeatHeat = data[offset];  offset += 1;
+        Auto = data[offset];  offset += 1;
+        FrontDefrost = data[offset];  offset += 1;
+        RearDefrost = data[offset];  offset += 1;
     }
 
     public byte getDriverTemp() {
@@ -575,16 +572,18 @@ class rcv_TPDV_HMS_HVAC_CONTROL{
     private byte RearDefrost; // "0x01 : On            0x00 : Off"
 
     rcv_TPDV_HMS_HVAC_CONTROL(byte[] data){
-        DriverTemp = data[0];
-        PassengerTemp = data[1];
-        FanSpeed = data[2];
-        AirFlow = data[3];
-        AC = data[4];
-        DriverSeatHeat = data[5];
-        PassengerSeatHeat = data[6];
-        Auto = data[7];
-        FrontDefrost = data[8];
-        RearDefrost = data[9];
+        int offset = 0;
+
+        DriverTemp = data[offset];  offset += 1;
+        PassengerTemp = data[offset];  offset += 1;
+        FanSpeed = data[offset];  offset += 1;
+        AirFlow = data[offset];  offset += 1;
+        AC = data[offset];  offset += 1;
+        DriverSeatHeat = data[offset];  offset += 1;
+        PassengerSeatHeat = data[offset];  offset += 1;
+        Auto = data[offset];  offset += 1;
+        FrontDefrost = data[offset];  offset += 1;
+        RearDefrost = data[offset];  offset += 1;
     }
 
     public byte getDriverTemp() {
@@ -675,7 +674,7 @@ class rcv_HMS_COMMON_DISPLAY_DANGER_INFO{
         conversion_LE kk = new conversion_LE();
         int offset = 0;
         IconCode = data[offset];        offset += 1;
-        param = data[offset];
+        param = data[offset];        offset += 1;
     }
 
     public byte getIconCode() {
@@ -698,7 +697,7 @@ class rcv_HMS_COMMON_DISPLAY_DANGER_ALARM{
         Display = kk.byteToChar_LE(data, offset);        offset += 2;
         Sound = kk.byteToChar_LE(data, offset);        offset += 2;
         Haptic = kk.byteToChar_LE(data, offset);        offset += 2;
-        Interval = kk.byteToChar_LE(data, offset);
+        Interval = kk.byteToChar_LE(data, offset);        offset += 2;
     }
 
     public char getDisplay() {
@@ -729,7 +728,7 @@ class rcv_HMS_COMMON_GPS_INFO{
         Longitude = kk.byteToDouble_LE(data, offset);        offset += 8;
         Altitude = kk.byteToDouble_LE(data, offset);        offset += 8;
         Heading = kk.byteToFloat_LE(data, offset);        offset += 4;
-        Speed = kk.byteToFloat_LE(data, offset);
+        Speed = kk.byteToFloat_LE(data, offset);        offset += 4;
     }
 
     public double getLatitude() {
@@ -767,7 +766,7 @@ class rcv_HMS_TPDV_DISPLAY_GOAL_MAP{
         reserved1 = data[offset];        offset += 1;
         reserved2 = data[offset];        offset += 1;
         reserved3 = data[offset];        offset += 1;
-        Name = kk.byteToCharArray_LE(data, offset, 64);
+        Name = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
     }
 
     public double getLatitude() {
@@ -794,7 +793,7 @@ class rcv_HMS_TPDV_DISPLAY_CURR_MAP{
         int offset = 0;
         Latitude = kk.byteToDouble_LE(data, offset);        offset += 8;
         Longitude = kk.byteToDouble_LE(data, offset);        offset += 8;
-        Name = kk.byteToCharArray_LE(data, offset, 64);
+        Name = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
     }
 
     public double getLatitude() {
@@ -947,8 +946,8 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED{
 
 
     rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED(byte[] data) {
-        conversion_LE kk = new conversion_LE();
-        int offset = 0;
+        //conversion_LE kk = new conversion_LE();
+        //int offset = 0;
 
     }
 }
@@ -957,15 +956,14 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_FINISHED{
 
 
     rcv_HMS_COMMON_NAVI_GUIDANCE_FINISHED(byte[] data) {
-        conversion_LE kk = new conversion_LE();
-        int offset = 0;
+        //conversion_LE kk = new conversion_LE();
+        //int offset = 0;
 
     }
 }
 
 class rcv_HMS_COMMON_DRIVER_INFO{
     char[] Name = new char[32]; // 운전자 이름
-
 
     rcv_HMS_COMMON_DRIVER_INFO(byte[] data) {
         conversion_LE kk = new conversion_LE();
