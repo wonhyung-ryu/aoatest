@@ -1,7 +1,6 @@
 package com.example.wonhyungryu.aoatest2;
 
 import android.util.Log;
-
 import java.util.ArrayList;
 
 /**
@@ -638,7 +637,7 @@ class rcv_HMS_COMMON_MUSIC_INFO {
         Genr = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
         Position = kk.byteToFloat_LE(data, offset);        offset += 4;
         Duration = kk.byteToFloat_LE(data, offset);        offset += 4;
-        Index = kk.byteToChar_LE(data, offset);
+        Index = kk.byteToChar_LE(data, offset);        offset += 2;
     }
 
     public char[] getTitle() {
@@ -808,27 +807,27 @@ class rcv_HMS_TPDV_DISPLAY_CURR_MAP{
 }
 
 class rcv_HMS_COMMON_STEERINGWHEEL_CONTROL{
+    /* "0x01 : VoiceRecognition
+        0x02 : 주행모드(수동/자율) 변경
+        0x03 : Volume Up
+        0x04 : Volume Down
+        0x05 : Mute
+        0x06 : Seek Up
+        0x07 : Seek Down
+        0x08 : Start Call
+        0x09 : End Call
+        0x0A : Main Menu Call
+        0x0B : Cruise
+        0x0C : Mode Up(위로 포커스 이동)
+        0x0D : Mode Down(아래로 포커스 이동)
+        0x0E : Mode OK
+        0x0F : RES+
+        0x10 : SET-
+        0x11 : Lane Keeping
+        0x12 : Cruise/Lane Keeping Cancel
+        0x13 : Paddle+
+        0x14 : Paddle-" */
     byte Command;
-        /* "0x01 : VoiceRecognition
-            0x02 : 주행모드(수동/자율) 변경
-            0x03 : Volume Up
-            0x04 : Volume Down
-            0x05 : Mute
-            0x06 : Seek Up
-            0x07 : Seek Down
-            0x08 : Start Call
-            0x09 : End Call
-            0x0A : Main Menu Call
-            0x0B : Cruise
-            0x0C : Mode Up(위로 포커스 이동)
-            0x0D : Mode Down(아래로 포커스 이동)
-            0x0E : Mode OK
-            0x0F : RES+
-            0x10 : SET-
-            0x11 : Lane Keeping
-            0x12 : Cruise/Lane Keeping Cancel
-            0x13 : Paddle+
-            0x14 : Paddle-" */
     byte Param; // "Command가 0x02인 경우.     0x01 : 수동주행    0x02 : 자율주행"
     byte reserved1;
     byte reserved2;
@@ -849,7 +848,6 @@ class rcv_HMS_COMMON_STEERINGWHEEL_CONTROL{
 }
 
 class rcv_HMS_COMMON_JOGDIAL_CONTROL{
-    byte Command;
     /* "    0x01 : Rotary Knob Right
             0x02 : Rotary Knob Left
             0x03 : Joystick Top
@@ -870,6 +868,7 @@ class rcv_HMS_COMMON_JOGDIAL_CONTROL{
             0x12 : Hand Gesture Hold
             0x13 : Hand Gesture Click
             0x14 : Hand Gesture Double Tab" */
+    byte Command;
     byte Status; // "0x01 : Button Push            0x02 : Button Release"
     byte reserved1;
     byte reserved2;
@@ -918,6 +917,7 @@ class rcv_HMS_COMMON_DRIVING_INFO{
     rcv_HMS_COMMON_DRIVING_INFO(byte[] data) {
         conversion_LE kk = new conversion_LE();
         int offset = 0;
+
         PossibleDrivingDistance = kk.byteToChar_LE(data, offset);        offset += 2;
         Speed = data[offset];        offset += 1;
         Power = data[offset];        offset += 1;
@@ -944,21 +944,17 @@ class rcv_HMS_COMMON_DRIVING_INFO{
 
 class rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED{
 
-
     rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED(byte[] data) {
         //conversion_LE kk = new conversion_LE();
         //int offset = 0;
-
     }
 }
 
 class rcv_HMS_COMMON_NAVI_GUIDANCE_FINISHED{
 
-
     rcv_HMS_COMMON_NAVI_GUIDANCE_FINISHED(byte[] data) {
         //conversion_LE kk = new conversion_LE();
         //int offset = 0;
-
     }
 }
 
