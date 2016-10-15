@@ -60,7 +60,7 @@ public class RCV_packet {
         Log.i(TAG, "mID : "+ (int)mID);
 
         dlength = cle.byteToChar_LE(buf, datalenAddr);
-        Log.i(TAG, "data length : "+ (int)dlength);
+        //Log.i(TAG, "data length : "+ (int)dlength);
 
         data = new byte[dlength];
         System.arraycopy(buf, 8, data, 0, dlength);
@@ -132,12 +132,13 @@ public class RCV_packet {
 
     public static final byte HMS_TPDV_DISPLAY_GOAL_MAP = 0x16;
     public static final byte HMS_TPDV_DISPLAY_CURR_MAP = 0x17;
+    public static final byte HMS_TPCR_PLAY_CONTENTS_INFO = 0x18;
 }
 
 class SURROUNDING_VEHICLE_n_INFO{
     public short VehicleId; // 타겟 ID
     public short Type; // "타겟 타입 "0x02 : 정적 교통 표지판, 0x04 : 정적 물체, 0x08 : 정적 방해물, 0x10 : 동적 물체, 0x20 : 차량, 0x40 : 오토바이(자전거), 0x80 : 보행자 "
-    public float SensorId; // "센서 아이디            300000 : 전방    300001 : 전방    300002 : 후방    300003 : 측면    300004 : 측면    300005 : 측면    300006 : 측면"
+    public int SensorId; // "센서 아이디            300000 : 전방    300001 : 전방    300002 : 후방    300003 : 측면    300004 : 측면    300005 : 측면    300006 : 측면"
     public double Latitude; // 타겟 위도
     public double Longitude; // 타겟 경도
     public double Altitude; // 타겟 고도
@@ -166,7 +167,7 @@ class rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO {
 
                 n_info.VehicleId = kk.byteToShort_LE(data, offset);                offset += 2;
                 n_info.Type = kk.byteToShort_LE(data, offset);                offset += 2;
-                n_info.SensorId = kk.byteToFloat_LE(data, offset);                offset += 4;
+                n_info.SensorId = kk.byteToInt_LE(data, offset);                offset += 4;
                 n_info.Latitude = kk.byteToDouble_LE(data, offset);                offset += 8;
                 n_info.Longitude = kk.byteToDouble_LE(data, offset);                offset += 8;
                 n_info.Altitude = kk.byteToDouble_LE(data, offset);                offset += 8;
@@ -192,13 +193,13 @@ class rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO {
 }
 
 class rcv_HMS_COMMON_SCENARIO_INFO {
-    private float Rain; // "0x00 : 맑음            0x01 : 폭우"
-    private float Snow; // "0x00 : 맑음            0x01 : 폭설"
-    private float Fog; // "0x00 : 맑음            0x01 : 진한 안개"
-    private float Cloud; // "0x00 : 맑음            0x01 : 폭풍구름"
-    private float WaterOnRoad; // 도로 강수량 0 ~ 20mm
-    private float SnowOnRoad; // 도로 강설량 0 ~ 20mm
-    private float DayTime; // 0 ~ 24 시간
+    private float Rain; // 0.0 : 맑음 ~ 1.0 : 폭우     0.0 < Data.Rain < 0.5 : light rain    0.5 <= Data.Rain <= 1.0 : heavy rain
+    private float Snow; // 0.0 : 맑음 ~ 1.0 : 폭설
+    private float Fog; // 안개로 인한 가시거리 : 0 ~ 50000    -1 : 안개 없음
+    private float Cloud; // 0.0 : 맑음 ~ 1.0 : 폭풍구름
+    private float WaterOnRoad; // 도로 강수량 0.0 ~ 20.0 mm
+    private float SnowOnRoad; // 도로 강설량 0.0 ~ 20.0 mm
+    private float DayTime; // 0.0 ~ 24.0 시간
     private int AutonomousRoad; // "0x00 수동주행 도로            0x01 자율주행 도로"
     private int TransitionTime; // 6초 -> 0초 수동 -> 자율 모드 전환 시간
     private int AutonomousMode; // "0x00 수동주행 모드            0x01 자율주행 모드"
@@ -806,6 +807,33 @@ class rcv_HMS_TPDV_DISPLAY_CURR_MAP{
     }
 }
 
+class rcv_HMS_TPCR_PLAY_CONTENTS_INFO {
+    private byte PlayingContents; //"0x01 : music            0x02 : video    0x03 : SNS    0x04 : news    0x05 : photo"
+    private byte PlayStatus;	// "0x01 : play            0x02 : pause"
+    private byte PlayDisplay;	//"0x01 : display2            0x02 : display3"
+    private byte reserved1;
+
+
+    rcv_HMS_TPCR_PLAY_CONTENTS_INFO(byte[] data){
+        conversion_LE kk = new conversion_LE();
+        int offset = 0;
+        PlayingContents = data[offset];  offset += 1;
+        PlayStatus = data[offset];  offset += 1;
+        PlayDisplay = data[offset];  offset += 1;
+        reserved1 = data[offset];  offset += 1;
+    }
+
+    public byte getPlayingContents() {
+        return PlayingContents;
+    }
+    public byte getPlayStatus() {
+        return PlayStatus;
+    }
+    public byte getPlayDisplay() {
+        return PlayDisplay;
+    }
+}
+
 class rcv_HMS_COMMON_STEERINGWHEEL_CONTROL{
     /* "0x01 : VoiceRecognition
         0x02 : 주행모드(수동/자율) 변경
@@ -828,7 +856,7 @@ class rcv_HMS_COMMON_STEERINGWHEEL_CONTROL{
         0x13 : Paddle+
         0x14 : Paddle-" */
     byte Command;
-    byte Param; // "Command가 0x02인 경우.     0x01 : 수동주행    0x02 : 자율주행"
+    byte Param; // unused
     byte reserved1;
     byte reserved2;
 
@@ -906,39 +934,42 @@ class rcv_HMS_COMMON_SYSTEM_CHECKING{
 }
 
 class rcv_HMS_COMMON_DRIVING_INFO{
-    char PossibleDrivingDistance; // km
-    byte Speed; // 0~160km
-    byte Power; // 0~100%
-    byte Charge; // 0~150%
-    byte Gear; // "0x01 : P            0X02 : D    0X03 : R"
-    byte reserved1;
-    byte reserved2;
+    int PossibleDrivingDistance; // km
+    float Speed; // 0~220km
+    float Power; // 0~100%
+    float Charge; // 0~150%
+    int Gear; // "0x0D : P            0X0E : D    0X0F : R"
+    int Lights; // "자차 Light 정보    0x00 : 좌측 깜박이    0x01 : 우측 깜박이    0x02 : 정지등    0x03 : 하향등    0x04 : 상향등    0x05 : 안개등    0x06 : 후진등"
 
     rcv_HMS_COMMON_DRIVING_INFO(byte[] data) {
         conversion_LE kk = new conversion_LE();
         int offset = 0;
 
-        PossibleDrivingDistance = kk.byteToChar_LE(data, offset);        offset += 2;
-        Speed = data[offset];        offset += 1;
-        Power = data[offset];        offset += 1;
-        Charge = data[offset];        offset += 1;
-        Gear = data[offset];        offset += 1;
+        PossibleDrivingDistance = kk.byteToInt_LE(data, offset);        offset += 4;
+        Speed = kk.byteToFloat_LE(data, offset);        offset += 4;
+        Power = kk.byteToFloat_LE(data, offset);        offset += 4;
+        Charge = kk.byteToFloat_LE(data, offset);        offset += 4;
+        Gear = kk.byteToInt_LE(data, offset);        offset += 4;
+        Lights = kk.byteToInt_LE(data, offset);        offset += 4;
     }
 
-    public char getPossibleDrivingDistance() {
+    public int getPossibleDrivingDistance() {
         return PossibleDrivingDistance;
     }
-    public byte getSpeed() {
+    public float getSpeed() {
         return Speed;
     }
-    public byte getPower() {
+    public float getPower() {
         return Power;
     }
-    public byte getCharge() {
+    public float getCharge() {
         return Charge;
     }
-    public byte getGear() {
+    public int getGear() {
         return Gear;
+    }
+    public int getLights() {
+        return Lights;
     }
 }
 
