@@ -136,16 +136,18 @@ public class RCV_packet {
 }
 
 class SURROUNDING_VEHICLE_n_INFO{
-    public short VehicleId; // 타겟 ID
-    public short Type; // "타겟 타입 "0x02 : 정적 교통 표지판, 0x04 : 정적 물체, 0x08 : 정적 방해물, 0x10 : 동적 물체, 0x20 : 차량, 0x40 : 오토바이(자전거), 0x80 : 보행자 "
+    public short VehicleId; // 타겟 ID    0xFF : Unknown(Ultra)
+    public short Type; // "타겟 타입 "0x02 : 정적 교통 표지판, 0x04 : 정적 물체, 0x08 : 정적 방해물, 0x10 : 동적 물체, 0x20 : 차량, 0x40 : 오토바이(자전거), 0x80 : 보행자 " 0xFF : Unknown
     public int SensorId; // "센서 아이디            300000 : 전방    300001 : 전방    300002 : 후방    300003 : 측면    300004 : 측면    300005 : 측면    300006 : 측면"
+                            // 400000 : Front Ultra    400001 : Front left Ultra    400002 : Front Ligth Ultra    400003 : Left Ultra    400004 : Right Ultra    400005 : Rear Ultra    400006 : Rear Left Ultra    400007 : Rear Right Ultra
     public double Latitude; // 타겟 위도
     public double Longitude; // 타겟 경도
     public double Altitude; // 타겟 고도
-    public float Heading; // 타겟 방향
+    public float Heading; // 타겟 방향      -50000 : Unknown
+    public float azimuthInVehicle; // 자차 헤딩 기준 상대차량 위치 각도    자차 기준 : 반시계방향 0 ~ 180    자차 기준 : 시계방향 0 ~ -180    ex ) -5도 ---> 내 차 기준으로 시계방향으로 5도 각도에 상대차량 있음
     public float DistanceToCollision; // 자차와 타겟간의 직선 거리
-    public float AbsoluteSpeed; // 타겟 속도
-    public float RelativeSpeed; // 상대 속도
+    public float AbsoluteSpeed; // 타겟 속도    -50000 : Unknown
+    public float RelativeSpeed; // 상대 속도    -50000 : Unknown
 }
 
 class rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO {
@@ -172,6 +174,7 @@ class rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO {
                 n_info.Longitude = kk.byteToDouble_LE(data, offset);                offset += 8;
                 n_info.Altitude = kk.byteToDouble_LE(data, offset);                offset += 8;
                 n_info.Heading = kk.byteToFloat_LE(data, offset);                offset += 4;
+                n_info.azimuthInVehicle = kk.byteToFloat_LE(data, offset);                offset += 4;
                 n_info.DistanceToCollision = kk.byteToFloat_LE(data, offset);                offset += 4;
                 n_info.AbsoluteSpeed = kk.byteToFloat_LE(data, offset);                offset += 4;
                 n_info.RelativeSpeed = kk.byteToFloat_LE(data, offset);                offset += 4;
@@ -193,13 +196,14 @@ class rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO {
 }
 
 class rcv_HMS_COMMON_SCENARIO_INFO {
-    private float Rain; // 0.0 : 맑음 ~ 1.0 : 폭우     0.0 < Data.Rain < 0.5 : light rain    0.5 <= Data.Rain <= 1.0 : heavy rain
-    private float Snow; // 0.0 : 맑음 ~ 1.0 : 폭설
+    private float Rain; // 0.0 : 맑음 ~ 1.0 : 폭우    0.0 ~ 0.5, Light    0.5 ~ 1.0 Heavy
+    private float Snow; // 0.0 : 맑음 ~ 1.0 : 폭설    0.0 ~ 0.5            0.5 ~ 1.0 Hail
     private float Fog; // 안개로 인한 가시거리 : 0 ~ 50000    -1 : 안개 없음
-    private float Cloud; // 0.0 : 맑음 ~ 1.0 : 폭풍구름
+    private float Cloud; // 0.0 : 맑음 ~ 1.0 : 폭풍구름    0.0 ~ 0.5            0.5 ~ 1.0 Cloudy
     private float WaterOnRoad; // 도로 강수량 0.0 ~ 20.0 mm
     private float SnowOnRoad; // 도로 강설량 0.0 ~ 20.0 mm
     private float DayTime; // 0.0 ~ 24.0 시간
+    private float Wind; // 바람 속도 0 ~ 100    0 ~ 50 Light    51 ~ 100 Windy
     private int AutonomousRoad; // "0x00 수동주행 도로            0x01 자율주행 도로"
     private int TransitionTime; // 6초 -> 0초 수동 -> 자율 모드 전환 시간
     private int AutonomousMode; // "0x00 수동주행 모드            0x01 자율주행 모드"
@@ -216,6 +220,7 @@ class rcv_HMS_COMMON_SCENARIO_INFO {
         WaterOnRoad = kk.byteToFloat_LE(data, offset); offset += 4;
         SnowOnRoad = kk.byteToFloat_LE(data, offset); offset += 4;
         DayTime = kk.byteToFloat_LE(data, offset); offset += 4;
+        Wind = kk.byteToFloat_LE(data, offset); offset += 4;
         AutonomousRoad = kk.byteToInt_LE(data, offset); offset += 4;
         TransitionTime = kk.byteToInt_LE(data, offset); offset += 4;
         AutonomousMode = kk.byteToInt_LE(data, offset); offset += 4;
@@ -243,6 +248,9 @@ class rcv_HMS_COMMON_SCENARIO_INFO {
     }
     public float getDayTime() {
         return DayTime;
+    }
+    public float getWind() {
+        return Wind;
     }
     public int getAutonomousRoad() {
         return AutonomousRoad;

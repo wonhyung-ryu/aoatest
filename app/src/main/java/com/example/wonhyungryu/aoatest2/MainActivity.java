@@ -38,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     FileInputStream mInputStream;
     FileOutputStream mOutputStream;
 
+    boolean acc_closed = true;
+    boolean usb_detech = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,21 +80,39 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         Button mBTN_S2 = (Button) findViewById(R.id.BTN_S2);
         mBTN_S2.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-
+                closeAccessory();
+                Log.e(TAG, "closeAccessory");
             }
         });
 
         Button mBTN_S3 = (Button) findViewById(R.id.BTN_S3);
         mBTN_S3.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-
+                UsbAccessory[] accessories = mUsbManager.getAccessoryList();
+                UsbAccessory accessory = (accessories == null ? null : accessories[0]);
+                if (accessory != null) {
+                    result_win_log("USB Host connected", true);
+                    Log.d(TAG, "USB Host connected");
+                    if (mUsbManager.hasPermission(accessory)) {
+                        openAccessory(accessory);
+                    } else {
+                        synchronized (mUsbReceiver) {
+                            if (!mPermissionRequestPending) {
+                                mUsbManager.requestPermission(accessory, mPermissionIntent);
+                                mPermissionRequestPending = true;
+                            }
+                        }
+                    }
+                } else {
+                    Log.d(TAG, "mAccessory is null");
+                    result_win_log("mAccessory is null", true);
+                }
             }
         });
 
         Button mBTN_S4 = (Button) findViewById(R.id.BTN_S4);
         mBTN_S4.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-
 
             }
         });
@@ -101,6 +122,11 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals((action))) {
+                Log.d(TAG, "ACTION_USB_ACCESSORY_ATTACHED");
+                result_win_log("ACTION_USB_ACCESSORY_ATTACHED", true);
+                usb_detech = false;
+            }
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
                     UsbAccessory accessory = UsbManager.getAccessory(intent);
@@ -118,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 if (accessory != null && accessory.equals(mAccessory)) {
                     Log.d(TAG, "ACTION_USB_ACCESSORY_DETACHED");
                     result_win_log("ACTION_USB_ACCESSORY_DETACHED", true);
+                    usb_detech = true;
                     closeAccessory();
                 }
             }
@@ -169,10 +196,13 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             FileDescriptor fd = mFileDescriptor.getFileDescriptor();
             mInputStream = new FileInputStream(fd);
             mOutputStream = new FileOutputStream(fd);
+
             Thread thread = new Thread(null, this, "AOATest");
             thread.start();
+
             Log.d(TAG, "accessory opened");
             result_win_log("accessory opened", true);
+            acc_closed = false;
         } else {
             Log.d(TAG, "accessory open fail");
             result_win_log("accessory open fail", true);
@@ -188,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         } finally {
             mFileDescriptor = null;
             mAccessory = null;
-            Log.d(TAG, "accessory close!");
+            acc_closed = true;
         }
     }
 
@@ -211,8 +241,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         while (ret >= 0) {
             try {
                 ret = mInputStream.read(buffer);
-                Log.d(TAG, "mInputStream.read : " + ret);
-                Log.d(TAG, "Rx data: " + byteArrayToHex(buffer));
+                //Log.d(TAG, "mInputStream.read : " + ret);
+                //Log.d(TAG, "Rx data: " + byteArrayToHex(buffer));
             } catch (IOException e) {
                 break;
             }
@@ -229,7 +259,6 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 mHandler.sendMessage(m);
             }
         }
-        Log.e(TAG, "Thread stop");
     }
 
     Handler mHandler = new Handler() {
@@ -258,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getLongitude " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).Longitude));
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getAltitude " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).Altitude));
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getHeading " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).Heading));
+                                result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.azimuthInVehicle " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).azimuthInVehicle));
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getDistanceToCollision " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).DistanceToCollision));
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getAbsoluteSpeed " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).AbsoluteSpeed));
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getRelativeSpeed " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).RelativeSpeed));
@@ -274,6 +304,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                         result_win_log(TAG, "rcv_HMS_COMMON_SCENARIO_INFO.getWaterOnRoad " + String.valueOf(rd2.getWaterOnRoad()));
                         result_win_log(TAG, "rcv_HMS_COMMON_SCENARIO_INFO.getSnowOnRoad " + String.valueOf(rd2.getSnowOnRoad()));
                         result_win_log(TAG, "rcv_HMS_COMMON_SCENARIO_INFO.getDayTime " + String.valueOf(rd2.getDayTime()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_SCENARIO_INFO.getWind " + String.valueOf(rd2.getWind()));
                         result_win_log(TAG, "rcv_HMS_COMMON_SCENARIO_INFO.getAutonomousRoad " + String.valueOf(rd2.getAutonomousRoad()));
                         result_win_log(TAG, "rcv_HMS_COMMON_SCENARIO_INFO.getTransitionTime " + String.valueOf(rd2.getTransitionTime()));
                         result_win_log(TAG, "rcv_HMS_COMMON_SCENARIO_INFO.getAutonomousMode " + String.valueOf(rd2.getAutonomousMode()));
@@ -306,13 +337,15 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
                     case RCV_packet.HMS_COMMON_AUTONOMOUS_DRIVING:
                         rcv_HMS_COMMON_AUTONOMOUS_DRIVING rd5 = new rcv_HMS_COMMON_AUTONOMOUS_DRIVING(rPkt.getData());
-                        result_win_log(TAG, "HMS_COMMON_AUTONOMOUS_DRIVING.getCommand " + String.valueOf(rd5.getCommand()));
+//                        result_win_log(TAG, "HMS_COMMON_AUTONOMOUS_DRIVING.getCommand " + String.valueOf(rd5.getCommand()));
+                        result_win_log( "HMS_COMMON_AUTONOMOUS_DRIVING.getCommand " + String.valueOf(rd5.getCommand()), true);
                         Log.i(TAG, "HMS_COMMON_AUTONOMOUS_DRIVING.getCommand " + String.valueOf(rd5.getCommand()));
                         break;
 
                     case RCV_packet.HMS_COMMON_MANUAL_DRIVING:
                         rcv_HMS_COMMON_MANUAL_DRIVING rd6 = new rcv_HMS_COMMON_MANUAL_DRIVING(rPkt.getData());
-                        result_win_log(TAG, "HMS_COMMON_MANUAL_DRIVING.getCommand " + String.valueOf(rd6.getCommand()));
+//                        result_win_log(TAG, "HMS_COMMON_MANUAL_DRIVING.getCommand " + String.valueOf(rd6.getCommand()));
+                        result_win_log( "HMS_COMMON_MANUAL_DRIVING.getCommand " + String.valueOf(rd6.getCommand()), true);
                         Log.i(TAG, "HMS_COMMON_MANUAL_DRIVING.getCommand " + String.valueOf(rd6.getCommand()));
                         break;
 
@@ -485,8 +518,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                         break;
                 }
             } else {
-                result_win_log(TAG, "What?? sender = " + String.valueOf(rPkt.getSender()));
-                result_win_log(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                result_win_log( "What?? sender = " + String.valueOf(rPkt.getSender()), true);
+                result_win_log( "What?? mID = " + String.valueOf(rPkt.getmID()), true);
                 Log.i(TAG, "What?? sender = " + String.valueOf(rPkt.getSender()));
                 Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
             }
