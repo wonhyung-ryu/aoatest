@@ -80,7 +80,7 @@ public class conversion_LE {
     }
 
     static int arrayRealLen(byte[] barray, int offset, int barray_len){
-        int j=64;
+        int j=barray_len;
         for (int i=0; i<barray_len; i++){
             if (barray[offset + i] == 0){
                 j=i;

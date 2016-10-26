@@ -445,7 +445,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
                     case RCV_packet.HMS_COMMON_DRIVER_INFO:
                         rcv_HMS_COMMON_DRIVER_INFO rd17 = new rcv_HMS_COMMON_DRIVER_INFO(rPkt.getData());
-                        result_win_log(TAG, "rcv_HMS_COMMON_DRIVER_INFO.getName " + String.valueOf(rd17.getName()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_DRIVER_INFO.getName " + rd17.getName());
                         break;
 
                     case RCV_packet.HMS_COMMON_GPS_INFO:
@@ -462,13 +462,14 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                         result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_GOAL_MAP.getLatitude " + String.valueOf(rd19.getLatitude()));
                         result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_GOAL_MAP.getLongitude " + String.valueOf(rd19.getLongitude()));
                         result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_GOAL_MAP.getGoalType " + String.valueOf(rd19.getGoalType()));
+                        result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_GOAL_MAP.getName " + rd19.getName());
                         break;
 
                     case RCV_packet.HMS_TPDV_DISPLAY_CURR_MAP:
                         rcv_HMS_TPDV_DISPLAY_CURR_MAP rd20 = new rcv_HMS_TPDV_DISPLAY_CURR_MAP(rPkt.getData());
                         result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_CURR_MAP.getLatitude " + String.valueOf(rd20.getLatitude()));
                         result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_CURR_MAP.getLongitude " + String.valueOf(rd20.getLongitude()));
-                        result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_CURR_MAP.getName " + String.valueOf(rd20.getName()));
+                        result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_CURR_MAP.getName " + rd20.getName());
                         break;
 
                     default:
@@ -504,10 +505,10 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 switch (rPkt.getmID()) {
                     case RCV_packet.HMS_COMMON_MUSIC_INFO:
                         rcv_HMS_COMMON_MUSIC_INFO rd1 = new rcv_HMS_COMMON_MUSIC_INFO(rPkt.getData());
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getTitle " + String.valueOf(rd1.getTitle()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getArtist " + String.valueOf(rd1.getArtist()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getAlbum " + String.valueOf(rd1.getAlbum()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getGenr " + String.valueOf(rd1.getGenr()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getTitle " + rd1.getTitle());
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getArtist " + rd1.getArtist());
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getAlbum " + rd1.getAlbum());
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getGenr " + rd1.getGenr());
                         result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getPosition " + String.valueOf(rd1.getPosition()));
                         result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getDuration " + String.valueOf(rd1.getDuration()));
                         result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getIndex " + String.valueOf(rd1.getIndex()));

@@ -13,17 +13,17 @@ import static com.example.wonhyungryu.aoatest2.conversion_LE.arrayRealLen;
  */
 
 public class RCV_packet {
-    private char STARTFRAME = 0;
+    private short STARTFRAME = 0;
     private byte sender = ID_NONE; // ID_TPDV, ID_TPCR
     private byte receiver = ID_NONE;
-    private char mID = 0; // message ID
-    private char dlength = 0; // data length
+    private short mID = 0; // message ID
+    private short dlength = 0; // data length
     private int ENDFRAME = 0;
     private byte [] data;
 
     private static final String TAG = "[AOATest]";
 
-    public char getSTARTFRAME() {
+    public short getSTARTFRAME() {
         return STARTFRAME;
     }
     public byte getSender() {
@@ -32,13 +32,13 @@ public class RCV_packet {
     public byte getReceiver() {
         return receiver;
     }
-    public char getmID() {
+    public short getmID() {
         return mID;
     }
     public byte[] getData() {
         return data;
     }
-    public char getDlength() {
+    public short getDlength() {
         return dlength;
     }
     public int getENDFRAME() {
@@ -47,7 +47,7 @@ public class RCV_packet {
 
     public int pktParse(byte[] buf) {
         conversion_LE cle = new conversion_LE();
-        STARTFRAME = cle.byteToChar_LE(buf, 0);
+        STARTFRAME = cle.byteToShort_LE(buf, 0);
         if(STARTFRAME != 0xDD){
             Log.i(TAG, "START FRAME incorrect! "+ STARTFRAME + " "+(buf[0]&0xFF) +" "+(buf[1]&0xFF));
             return -1;
@@ -61,10 +61,10 @@ public class RCV_packet {
             return -2;
         }
 
-        mID = cle.byteToChar_LE(buf, mIDAddr);
+        mID = cle.byteToShort_LE(buf, mIDAddr);
         Log.i(TAG, "mID : "+ (int)mID);
 
-        dlength = cle.byteToChar_LE(buf, datalenAddr);
+        dlength = cle.byteToShort_LE(buf, datalenAddr);
         //Log.i(TAG, "data length : "+ (int)dlength);
 
         data = new byte[dlength];
@@ -308,7 +308,7 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
     private char Dist2GP; // m
     private int Time2Goal; // second
     private int Time2GP; // second
-    private char TotalDist; // m
+    private short TotalDist; // m
     private byte TBTCode;
     private byte SpeedLimit; // km
     private byte[] CurrentRoadName;// = new byte[64];
@@ -324,7 +324,7 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
         Dist2GP = kk.byteToChar_LE (data, offset); offset += 2;
         Time2Goal = kk.byteToInt_LE(data, offset); offset += 4;
         Time2GP = kk.byteToInt_LE(data, offset); offset += 4;
-        TotalDist = kk.byteToChar_LE (data, offset); offset += 2;
+        TotalDist = kk.byteToShort_LE (data, offset); offset += 2;
         TBTCode = data[offset]; offset += 1;
         SpeedLimit = data[offset]; offset += 1;
 //        CurrentRoadName = kk.byteToCharArray_LE(data, offset, 64); offset += 64;
@@ -352,7 +352,7 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
     public int getTime2GP() {
         return Time2GP;
     }
-    public char getTotalDist() {
+    public short getTotalDist() {
         return TotalDist;
     }
     public byte getTBTCode() {
@@ -640,39 +640,49 @@ class rcv_TPDV_HMS_HVAC_CONTROL{
 }
 
 class rcv_HMS_COMMON_MUSIC_INFO {
-    private char[] Title = new char[32];
-    private char[] Artist = new char[32];
-    private char[] Album = new char[32];
-    private char[] Genr = new char[32];
+    private byte[] Title; // = new char[32];
+    private byte[] Artist; // = new char[32];
+    private byte[] Album; // = new char[32];
+    private byte[] Genr; // = new char[32];
     private float Position;
     private float Duration;
-    private char Index;
+    private short Index;
     private byte reserved1;
     private byte reserved2;
 
     rcv_HMS_COMMON_MUSIC_INFO(byte[] data) {
         conversion_LE kk = new conversion_LE();
-        int offset = 0;
-        Title = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
-        Artist = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
-        Album = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
-        Genr = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
+        int offset = 0, noZeroLen = 0;
+
+        noZeroLen = arrayRealLen(data, offset, 64);
+        Title = new byte[noZeroLen];
+        System.arraycopy(data, offset, Title, 0, noZeroLen); offset += 64;
+        noZeroLen = arrayRealLen(data, offset, 64);
+        Artist = new byte[noZeroLen];
+        System.arraycopy(data, offset, Artist, 0, noZeroLen); offset += 64;
+        noZeroLen = arrayRealLen(data, offset, 64);
+        Album = new byte[noZeroLen];
+        System.arraycopy(data, offset, Album, 0, noZeroLen); offset += 64;
+        noZeroLen = arrayRealLen(data, offset, 64);
+        Genr = new byte[noZeroLen];
+        System.arraycopy(data, offset, Genr, 0, noZeroLen); offset += 64;
+
         Position = kk.byteToFloat_LE(data, offset);        offset += 4;
         Duration = kk.byteToFloat_LE(data, offset);        offset += 4;
-        Index = kk.byteToChar_LE(data, offset);        offset += 2;
+        Index = kk.byteToShort_LE(data, offset);        offset += 2;
     }
 
-    public char[] getTitle() {
-        return Title;
+    public String getTitle() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(Title)));
     }
-    public char[] getArtist() {
-        return Artist;
+    public String getArtist() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(Artist)));
     }
-    public char[] getAlbum() {
-        return Album;
+    public String getAlbum() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(Album)));
     }
-    public char[] getGenr() {
-        return Genr;
+    public String getGenr() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(Genr)));
     }
     public float getPosition() {
         return Position;
@@ -680,7 +690,7 @@ class rcv_HMS_COMMON_MUSIC_INFO {
     public float getDuration() {
         return Duration;
     }
-    public char getIndex() {
+    public short getIndex() {
         return Index;
     }
 }
@@ -707,30 +717,30 @@ class rcv_HMS_COMMON_DISPLAY_DANGER_INFO{
 }
 
 class rcv_HMS_COMMON_DISPLAY_DANGER_ALARM{
-    private char Display; // "0x01 : Display1, 0x02 : Display2, 0x04 : Display3, 0x08 : Display4, 0x10 : Display5, 0x20 : LED, 0x40 : ARHUD, 0x80 : LEFT SIDE MIRROR, 0x100 : RIGHT SIDE MIRROR"
-    private char Sound; // "0x01 : 위험도 1             0x02 : 위험도 2            0x03 : 위험도 3"
-    private char Haptic;
-    private char Interval; // 표시 간격(ms)
+    private short Display; // "0x01 : Display1, 0x02 : Display2, 0x04 : Display3, 0x08 : Display4, 0x10 : Display5, 0x20 : LED, 0x40 : ARHUD, 0x80 : LEFT SIDE MIRROR, 0x100 : RIGHT SIDE MIRROR"
+    private short Sound; // "0x01 : 위험도 1             0x02 : 위험도 2            0x03 : 위험도 3"
+    private short Haptic;
+    private short Interval; // 표시 간격(ms)
 
     rcv_HMS_COMMON_DISPLAY_DANGER_ALARM(byte[] data) {
         conversion_LE kk = new conversion_LE();
         int offset = 0;
-        Display = kk.byteToChar_LE(data, offset);        offset += 2;
-        Sound = kk.byteToChar_LE(data, offset);        offset += 2;
-        Haptic = kk.byteToChar_LE(data, offset);        offset += 2;
-        Interval = kk.byteToChar_LE(data, offset);        offset += 2;
+        Display = kk.byteToShort_LE(data, offset);        offset += 2;
+        Sound = kk.byteToShort_LE(data, offset);        offset += 2;
+        Haptic = kk.byteToShort_LE(data, offset);        offset += 2;
+        Interval = kk.byteToShort_LE(data, offset);        offset += 2;
     }
 
-    public char getDisplay() {
+    public short getDisplay() {
         return Display;
     }
-    public char getSound() {
+    public short getSound() {
         return Sound;
     }
-    public char getHaptic() {
+    public short getHaptic() {
         return Haptic;
     }
-    public char getInterval() {
+    public short getInterval() {
         return Interval;
     }
 }
@@ -776,18 +786,20 @@ class rcv_HMS_TPDV_DISPLAY_GOAL_MAP{
     private byte reserved1;
     private byte reserved2;
     private byte reserved3;
-    private char[] Name = new char[32];
+    private byte[] Name; // = new char[32];
 
     rcv_HMS_TPDV_DISPLAY_GOAL_MAP(byte[] data) {
         conversion_LE kk = new conversion_LE();
-        int offset = 0;
+        int offset = 0, noZeroLen=0;
         Latitude = kk.byteToDouble_LE(data, offset);        offset += 8;
         Longitude = kk.byteToDouble_LE(data, offset);        offset += 8;
         GoalType = data[offset];        offset += 1;
         reserved1 = data[offset];        offset += 1;
         reserved2 = data[offset];        offset += 1;
         reserved3 = data[offset];        offset += 1;
-        Name = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
+        noZeroLen = arrayRealLen(data, offset, 64);
+        Name = new byte[noZeroLen];
+        System.arraycopy(data, offset, Name, 0, noZeroLen); offset += 64;
     }
 
     public double getLatitude() {
@@ -799,22 +811,24 @@ class rcv_HMS_TPDV_DISPLAY_GOAL_MAP{
     public byte getGoalType() {
         return GoalType;
     }
-    public char[] getName() {
-        return Name;
+    public String getName() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(Name)));
     }
 }
 
 class rcv_HMS_TPDV_DISPLAY_CURR_MAP{
     private double Latitude; // 표시용 목적지 위도
     private double Longitude; // 표시용 목적지 경도
-    private char[] Name = new char[32];
+    private byte[] Name; // = new char[32];
 
     rcv_HMS_TPDV_DISPLAY_CURR_MAP(byte[] data) {
         conversion_LE kk = new conversion_LE();
-        int offset = 0;
+        int offset = 0, noZeroLen=0;
         Latitude = kk.byteToDouble_LE(data, offset);        offset += 8;
         Longitude = kk.byteToDouble_LE(data, offset);        offset += 8;
-        Name = kk.byteToCharArray_LE(data, offset, 64);        offset += 64;
+        noZeroLen = arrayRealLen(data, offset, 64);
+        Name = new byte[noZeroLen];
+        System.arraycopy(data, offset, Name, 0, noZeroLen); offset += 64;
     }
 
     public double getLatitude() {
@@ -823,8 +837,8 @@ class rcv_HMS_TPDV_DISPLAY_CURR_MAP{
     public double getLongitude() {
         return Longitude;
     }
-    public char[] getName() {
-        return Name;
+    public String getName() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(Name)));
     }
 }
 
@@ -876,10 +890,10 @@ class rcv_HMS_COMMON_STEERINGWHEEL_CONTROL{
         0x12 : Cruise/Lane Keeping Cancel
         0x13 : Paddle+
         0x14 : Paddle-" */
-    byte Command;
-    byte Param; // unused
-    byte reserved1;
-    byte reserved2;
+    private byte Command;
+    private byte Param; // unused
+    private byte reserved1;
+    private byte reserved2;
 
     rcv_HMS_COMMON_STEERINGWHEEL_CONTROL(byte[] data) {
         conversion_LE kk = new conversion_LE();
@@ -917,10 +931,10 @@ class rcv_HMS_COMMON_JOGDIAL_CONTROL{
             0x12 : Hand Gesture Hold
             0x13 : Hand Gesture Click
             0x14 : Hand Gesture Double Tab" */
-    byte Command;
-    byte Status; // "0x01 : Button Push            0x02 : Button Release"
-    byte reserved1;
-    byte reserved2;
+    private byte Command;
+    private byte Status; // "0x01 : Button Push            0x02 : Button Release"
+    private byte reserved1;
+    private byte reserved2;
 
     rcv_HMS_COMMON_JOGDIAL_CONTROL(byte[] data) {
         conversion_LE kk = new conversion_LE();
@@ -938,10 +952,10 @@ class rcv_HMS_COMMON_JOGDIAL_CONTROL{
 }
 
 class rcv_HMS_COMMON_SYSTEM_CHECKING{
-    byte Command; // "0x01 : 시작            0x02 : 종료"
-    byte reserved1;
-    byte reserved2;
-    byte reserved3;
+    private byte Command; // "0x01 : 시작            0x02 : 종료"
+    private byte reserved1;
+    private byte reserved2;
+    private byte reserved3;
 
     rcv_HMS_COMMON_SYSTEM_CHECKING(byte[] data) {
         conversion_LE kk = new conversion_LE();
@@ -955,12 +969,12 @@ class rcv_HMS_COMMON_SYSTEM_CHECKING{
 }
 
 class rcv_HMS_COMMON_DRIVING_INFO{
-    int PossibleDrivingDistance; // km
-    float Speed; // 0~220km
-    float Power; // 0~100%
-    float Charge; // 0~150%
-    int Gear; // "0x0D : P            0X0E : D    0X0F : R"
-    int Lights; // "자차 Light 정보    0x00 : 좌측 깜박이    0x01 : 우측 깜박이    0x02 : 정지등    0x03 : 하향등    0x04 : 상향등    0x05 : 안개등    0x06 : 후진등"
+    private int PossibleDrivingDistance; // km
+    private float Speed; // 0~220km
+    private float Power; // 0~100%
+    private float Charge; // 0~150%
+    private int Gear; // "0x0D : P            0X0E : D    0X0F : R"
+    private int Lights; // "자차 Light 정보    0x00 : 좌측 깜박이    0x01 : 우측 깜박이    0x02 : 정지등    0x03 : 하향등    0x04 : 상향등    0x05 : 안개등    0x06 : 후진등"
 
     rcv_HMS_COMMON_DRIVING_INFO(byte[] data) {
         conversion_LE kk = new conversion_LE();
@@ -1011,15 +1025,17 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_FINISHED{
 }
 
 class rcv_HMS_COMMON_DRIVER_INFO{
-    char[] Name = new char[32]; // 운전자 이름
+    private byte[] Name; // = new char[32]; // 운전자 이름
 
     rcv_HMS_COMMON_DRIVER_INFO(byte[] data) {
         conversion_LE kk = new conversion_LE();
-        int offset = 0;
-        Name = kk.byteToCharArray_LE(data, offset, 64);         offset += 64;
+        int offset = 0, noZeroLen =0;
+        noZeroLen = arrayRealLen(data, offset, 64);
+        Name = new byte[noZeroLen];
+        System.arraycopy(data, offset, Name, 0, noZeroLen); offset += 64;
     }
 
-    public char[] getName() {
-        return Name;
+    public String getName() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(Name)));
     }
 }
