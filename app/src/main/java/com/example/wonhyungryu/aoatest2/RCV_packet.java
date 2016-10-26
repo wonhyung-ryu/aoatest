@@ -1,7 +1,12 @@
 package com.example.wonhyungryu.aoatest2;
 
 import android.util.Log;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+
+import static com.example.wonhyungryu.aoatest2.conversion_LE.arrayRealLen;
 
 /**
  * Created by wonhyung.ryu on 2016-09-29.
@@ -306,14 +311,15 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
     private char TotalDist; // m
     private byte TBTCode;
     private byte SpeedLimit; // km
-    private char[] CurrentRoadName = new char[32];
-    private char[] DirectionRoadName = new char[32];
+    private byte[] CurrentRoadName;// = new byte[64];
+    private byte[] DirectionRoadName;// = new byte[64];
     private char ADStartDistOffset; // m. 현재 AD 구간이 시작하는 거리
     private char ADDist; // m. 현재 AD 구간의 총 거리
 
     rcv_HMS_COMMON_NAVI_GUIDANCE_INFO(byte[] data){
         conversion_LE kk = new conversion_LE();
-        int offset = 0;
+        int offset = 0, noZeroLen=0;
+
         Dist2Goal = kk.byteToChar_LE (data, offset); offset += 2;
         Dist2GP = kk.byteToChar_LE (data, offset); offset += 2;
         Time2Goal = kk.byteToInt_LE(data, offset); offset += 4;
@@ -321,8 +327,15 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
         TotalDist = kk.byteToChar_LE (data, offset); offset += 2;
         TBTCode = data[offset]; offset += 1;
         SpeedLimit = data[offset]; offset += 1;
-        CurrentRoadName = kk.byteToCharArray_LE(data, offset, 64); offset += 64;
-        DirectionRoadName = kk.byteToCharArray_LE(data, offset, 64); offset += 64;
+//        CurrentRoadName = kk.byteToCharArray_LE(data, offset, 64); offset += 64;
+//        DirectionRoadName = kk.byteToCharArray_LE(data, offset, 64); offset += 64;
+        noZeroLen = arrayRealLen(data, offset, 64);
+        CurrentRoadName = new byte[noZeroLen];
+        System.arraycopy(data, offset, CurrentRoadName, 0, noZeroLen); offset += 64;
+        noZeroLen = arrayRealLen(data, offset, 64);
+        DirectionRoadName = new byte[noZeroLen];
+        System.arraycopy(data, offset, DirectionRoadName, 0, noZeroLen); offset += 64;
+
         ADStartDistOffset = kk.byteToChar_LE(data, offset); offset += 2;
         ADDist = kk.byteToChar_LE(data, offset);  offset += 2;
     }
@@ -348,11 +361,11 @@ class rcv_HMS_COMMON_NAVI_GUIDANCE_INFO {
     public byte getSpeedLimit() {
         return SpeedLimit;
     }
-    public char[] getCurrentRoadName() {
-        return CurrentRoadName;
+    public String getCurrentRoadName() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(CurrentRoadName)));
     }
-    public char[] getDirectionRoadName() {
-        return DirectionRoadName;
+    public String getDirectionRoadName() {
+        return String.valueOf(Charset.forName("UTF-8").decode(ByteBuffer.wrap(DirectionRoadName)));
     }
     public char getADStartDistOffset() {
         return ADStartDistOffset;

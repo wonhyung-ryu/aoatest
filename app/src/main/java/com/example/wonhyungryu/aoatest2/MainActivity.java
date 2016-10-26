@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 tmp.setPassengerTemp((byte) 10);
 
                 sendCommand(tmp.getPacket());
+                Log.e(TAG, "Send Packet");
+
             }
         });
 
@@ -90,12 +92,12 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             public void onClick(View v) {
                 UsbAccessory[] accessories = mUsbManager.getAccessoryList();
                 UsbAccessory accessory = (accessories == null ? null : accessories[0]);
-                if (accessory != null) {
+/*                if (accessory != null) {
                     result_win_log("USB Host connected", true);
                     Log.d(TAG, "USB Host connected");
-                    if (mUsbManager.hasPermission(accessory)) {
+                    if (mUsbManager.hasPermission(accessory)) {*/
                         openAccessory(accessory);
-                    } else {
+/*                    } else {
                         synchronized (mUsbReceiver) {
                             if (!mPermissionRequestPending) {
                                 mUsbManager.requestPermission(accessory, mPermissionIntent);
@@ -106,13 +108,16 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 } else {
                     Log.d(TAG, "mAccessory is null");
                     result_win_log("mAccessory is null", true);
-                }
+                }*/
             }
         });
 
         Button mBTN_S4 = (Button) findViewById(R.id.BTN_S4);
         mBTN_S4.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
+                Log.d(TAG, "usb_detach? "+usb_detech);
+                Log.d(TAG, "acc_closed? "+acc_closed);
+                Log.d(TAG, "getAccessoryList : "+ mUsbManager.getAccessoryList()[0]);
 
             }
         });
@@ -122,11 +127,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals((action))) {
-                Log.d(TAG, "ACTION_USB_ACCESSORY_ATTACHED");
-                result_win_log("ACTION_USB_ACCESSORY_ATTACHED", true);
-                usb_detech = false;
-            }
+
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
                     UsbAccessory accessory = UsbManager.getAccessory(intent);
@@ -139,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                     }
                     mPermissionRequestPending = false;
                 }
+                usb_detech = false;
+
             } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
                 UsbAccessory accessory = UsbManager.getAccessory(intent);
                 if (accessory != null && accessory.equals(mAccessory)) {
@@ -201,11 +204,11 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             thread.start();
 
             Log.d(TAG, "accessory opened");
-            result_win_log("accessory opened", true);
+            //result_win_log("accessory opened", true);
             acc_closed = false;
         } else {
             Log.d(TAG, "accessory open fail");
-            result_win_log("accessory open fail", true);
+            //result_win_log("accessory open fail", true);
         }
     }
 
@@ -229,10 +232,32 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 mOutputStream.write(buffer);
             } catch (IOException e) {
                 Log.e(TAG, "write failed", e);
-                result_win_log("Write failed", true);
+
+                rwException.sendEmptyMessage(1);
             }
         }
     }
+
+    Handler rwException = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            UsbAccessory[] accessories = mUsbManager.getAccessoryList();
+            UsbAccessory accessory = (accessories == null ? null : accessories[0]);
+
+            switch (msg.what){
+                case 1:
+                    Log.e(TAG, "write fail _ try acc open");
+                    break;
+
+                case 2:
+                    Log.e(TAG, "read fail _ try acc open");
+                    break;
+            }
+            if (acc_closed && accessory !=null) {
+                openAccessory(accessory);
+            }
+        }
+    };
 
     public void run() {
         int ret = 0;
@@ -242,8 +267,9 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             try {
                 ret = mInputStream.read(buffer);
                 //Log.d(TAG, "mInputStream.read : " + ret);
-                //Log.d(TAG, "Rx data: " + byteArrayToHex(buffer));
+                Log.d(TAG, "Rx data: " + byteArrayToHex(buffer));
             } catch (IOException e) {
+                rwException.sendEmptyMessageDelayed(2, 5000);
                 break;
             }
 
@@ -266,11 +292,11 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         public void handleMessage(Message msg) {
             RCV_packet rPkt = (RCV_packet) msg.obj;
 
-            result_win_log(TAG, "rPkt.getSTARTFRAME() : "+String.valueOf(rPkt.getSTARTFRAME()));
+            result_win_log(TAG, "rPkt.getSTARTFRAME() : "+String.valueOf((short)rPkt.getSTARTFRAME()));
             result_win_log(TAG, "rPkt.getSender() : "+String.valueOf(rPkt.getSender()));
             result_win_log(TAG, "rPkt.getReceiver() : "+String.valueOf(rPkt.getReceiver()));
-            result_win_log(TAG, "rPkt.getmID() : "+String.valueOf(rPkt.getmID()));
-            result_win_log(TAG, "rPkt.getDlength() : "+String.valueOf(rPkt.getDlength()));
+            result_win_log(TAG, "rPkt.getmID() : "+String.valueOf((short)rPkt.getmID()));
+            result_win_log(TAG, "rPkt.getDlength() : "+String.valueOf((short)rPkt.getDlength()));
 
             if (rPkt.getSender() == RCV_packet.ID_CM) {
                 switch (rPkt.getmID()) {
@@ -322,17 +348,18 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
                     case RCV_packet.HMS_COMMON_NAVI_GUIDANCE_INFO:
                         rcv_HMS_COMMON_NAVI_GUIDANCE_INFO rd4 = new rcv_HMS_COMMON_NAVI_GUIDANCE_INFO(rPkt.getData());
-                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDist2Goal " + String.valueOf(rd4.getDist2Goal()));
-                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDist2GP " + String.valueOf(rd4.getDist2GP()));
+                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDist2Goal " + String.valueOf((int)rd4.getDist2Goal()));
+                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDist2GP " + String.valueOf((int)rd4.getDist2GP()));
                         result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getTime2Goal " + String.valueOf(rd4.getTime2Goal()));
                         result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getTime2GP " + String.valueOf(rd4.getTime2GP()));
                         result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getTotalDist " + String.valueOf(rd4.getTotalDist()));
                         result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getTBTCode " + String.valueOf(rd4.getTBTCode()));
                         result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getSpeedLimit " + String.valueOf(rd4.getSpeedLimit()));
-                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getCurrentRoadName " + String.valueOf(rd4.getCurrentRoadName()));
-                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDirectionRoadName " + String.valueOf(rd4.getDirectionRoadName()));
-                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getADStartDistOffset " + String.valueOf(rd4.getADStartDistOffset()));
-                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getADDist " + String.valueOf(rd4.getADDist()));
+                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getCurrentRoadName " + rd4.getCurrentRoadName());
+                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDirectionRoadName " + rd4.getDirectionRoadName());
+                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getADStartDistOffset " + String.valueOf((int)rd4.getADStartDistOffset()));
+                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getADDist " + String.valueOf((int)rd4.getADDist()));
+
                         break;
 
                     case RCV_packet.HMS_COMMON_AUTONOMOUS_DRIVING:
