@@ -298,7 +298,31 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             result_win_log(TAG, "rPkt.getmID() : "+String.valueOf((short)rPkt.getmID()));
             result_win_log(TAG, "rPkt.getDlength() : "+String.valueOf((short)rPkt.getDlength()));
 
-            if (rPkt.getSender() == RCV_packet.ID_CM) {
+            if (rPkt.getSender() == RCV_packet.ID_TPCR) {
+                switch (rPkt.getmID()) {
+                    case RCV_packet.TPCR_HMS_HVAC_CONTROL:
+                        rcv_TPCR_HMS_HVAC_CONTROL rd1 = new rcv_TPCR_HMS_HVAC_CONTROL(rPkt.getData());
+                        result_win_log(TAG, "rcv_TPCR_HMS_HVAC_CONTROL.getPassengerTemp " + String.valueOf(rd1.getPassengerTemp()));
+                        break;
+
+                    default:
+                        result_win_log(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                        Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                        break;
+                }
+            } else if (rPkt.getSender() == RCV_packet.ID_TPDV) {
+                switch (rPkt.getmID()) {
+                    case RCV_packet.TPDV_HMS_HVAC_CONTROL:
+                        rcv_TPDV_HMS_HVAC_CONTROL rd1 = new rcv_TPDV_HMS_HVAC_CONTROL(rPkt.getData());
+                        result_win_log(TAG, "rcv_TPDV_HMS_HVAC_CONTROL.getPassengerTemp " + String.valueOf(rd1.getPassengerTemp()));
+                        break;
+
+                    default:
+                        result_win_log(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                        Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                        break;
+                }
+            } else  {
                 switch (rPkt.getmID()) {
                     case RCV_packet.HMS_COMMON_SURROUNDING_VEHICLE_INFO:
                         rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO rd1 = new rcv_HMS_COMMON_SURROUNDING_VEHICLE_INFO(rPkt.getData());
@@ -317,6 +341,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getDistanceToCollision " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).DistanceToCollision));
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getAbsoluteSpeed " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).AbsoluteSpeed));
                                 result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.getRelativeSpeed " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).RelativeSpeed));
+                                result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.LaneId " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).LaneId));
+                                result_win_log(TAG, "HMS_COMMON_SURROUNDING_VEHICLE_INFO.RoadGap " + i + " " + String.valueOf(rd1.getSURROUNDING_VEHICLE_n_INFO(i).RoadGap));
                             }
                         }
                         break;
@@ -348,8 +374,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
                     case RCV_packet.HMS_COMMON_NAVI_GUIDANCE_INFO:
                         rcv_HMS_COMMON_NAVI_GUIDANCE_INFO rd4 = new rcv_HMS_COMMON_NAVI_GUIDANCE_INFO(rPkt.getData());
-                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDist2Goal " + String.valueOf((int)rd4.getDist2Goal()));
-                        result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDist2GP " + String.valueOf((int)rd4.getDist2GP()));
+                        Log.e(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDist2Goal " + String.valueOf((int)rd4.getDist2Goal()));
+                        Log.e(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getDist2GP " + String.valueOf((int)rd4.getDist2GP()));
                         result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getTime2Goal " + String.valueOf(rd4.getTime2Goal()));
                         result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getTime2GP " + String.valueOf(rd4.getTime2GP()));
                         result_win_log(TAG, "HMS_COMMON_NAVI_GUIDANCE_INFO.getTotalDist " + String.valueOf(rd4.getTotalDist()));
@@ -435,7 +461,12 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
                     case RCV_packet.HMS_COMMON_NAVI_GUIDANCE_STARTED:
                         rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED rd15 = new rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED(rPkt.getData());
-                        result_win_log(TAG, "rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED. ");
+                        Log.e(TAG, "rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED.getStartLatitude "+ String.valueOf(rd15.getStartLatitude()));
+                        Log.e(TAG, "rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED.getStartLongitude "+ String.valueOf(rd15.getStartLongitude()));
+                        Log.e(TAG, "rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED.getGoalLatitude "+ String.valueOf(rd15.getGoalLatitude()));
+                        Log.e(TAG, "rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED.getGoalLatitude "+ String.valueOf(rd15.getGoalLatitude()));
+                        Log.e(TAG, "rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED.getStartName "+ String.valueOf(rd15.getStartName()));
+                        Log.e(TAG, "rcv_HMS_COMMON_NAVI_GUIDANCE_STARTED.getGoalName "+ String.valueOf(rd15.getGoalName()));
                         break;
 
                     case RCV_packet.HMS_COMMON_NAVI_GUIDANCE_FINISHED:
@@ -450,11 +481,13 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
                     case RCV_packet.HMS_COMMON_GPS_INFO:
                         rcv_HMS_COMMON_GPS_INFO rd18 = new rcv_HMS_COMMON_GPS_INFO(rPkt.getData());
-                        result_win_log(TAG, "rcv_HMS_COMMON_GPS_INFO.getLatitude " + String.valueOf(rd18.getLatitude()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_GPS_INFO.getLongitude " + String.valueOf(rd18.getLongitude()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_GPS_INFO.getAltitude " + String.valueOf(rd18.getAltitude()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_GPS_INFO.getHeading " + String.valueOf(rd18.getHeading()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_GPS_INFO.getSpeed " + String.valueOf(rd18.getSpeed()));
+                        Log.e(TAG, "rcv_HMS_COMMON_GPS_INFO.getLatitude " + String.valueOf(rd18.getLatitude()));
+                        Log.e(TAG, "rcv_HMS_COMMON_GPS_INFO.getLongitude " + String.valueOf(rd18.getLongitude()));
+                        Log.e(TAG, "rcv_HMS_COMMON_GPS_INFO.getAltitude " + String.valueOf(rd18.getAltitude()));
+                        Log.e(TAG, "rcv_HMS_COMMON_GPS_INFO.getHeading " + String.valueOf(rd18.getHeading()));
+                        Log.e(TAG, "rcv_HMS_COMMON_GPS_INFO.getSpeed " + String.valueOf(rd18.getSpeed()));
+                        Log.e(TAG, "rcv_HMS_COMMON_DRIVING_INFO.getLaneID " + String.valueOf(rd18.getLaneID()));
+                        Log.e(TAG, "rcv_HMS_COMMON_DRIVING_INFO.getRoadGap " + String.valueOf(rd18.getRoadGap()));
                         break;
 
                     case RCV_packet.HMS_TPDV_DISPLAY_GOAL_MAP:
@@ -472,84 +505,53 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                         result_win_log(TAG, "rcv_HMS_TPDV_DISPLAY_CURR_MAP.getName " + rd20.getName());
                         break;
 
-                    default:
-                        result_win_log(TAG, "What?? mID = " + String.valueOf((int)rPkt.getmID()));
-                        Log.i(TAG, "What?? mID = " + String.valueOf((int)rPkt.getmID()));
-                        break;
-                }
-            } else if (rPkt.getSender() == RCV_packet.ID_TPCR) {
-                switch (rPkt.getmID()) {
-                    case RCV_packet.TPCR_HMS_HVAC_CONTROL:
-                        rcv_TPCR_HMS_HVAC_CONTROL rd1 = new rcv_TPCR_HMS_HVAC_CONTROL(rPkt.getData());
-                        result_win_log(TAG, "rcv_TPCR_HMS_HVAC_CONTROL.getPassengerTemp " + String.valueOf(rd1.getPassengerTemp()));
+                    case RCV_packet.HMS_COMMON_START_INTRO:
+                        result_win_log(TAG, "HMS_COMMON_START_INTRO " );
                         break;
 
-                    default:
-                        result_win_log(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
-                        Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
-                        break;
-                }
-            } else if (rPkt.getSender() == RCV_packet.ID_TPDV) {
-                switch (rPkt.getmID()) {
-                    case RCV_packet.TPDV_HMS_HVAC_CONTROL:
-                        rcv_TPDV_HMS_HVAC_CONTROL rd1 = new rcv_TPDV_HMS_HVAC_CONTROL(rPkt.getData());
-                        result_win_log(TAG, "rcv_TPDV_HMS_HVAC_CONTROL.getPassengerTemp " + String.valueOf(rd1.getPassengerTemp()));
+                    case RCV_packet.HMS_COMMON_START_OUTRO:
+                        result_win_log(TAG, "HMS_COMMON_START_OUTRO " );
                         break;
 
-                    default:
-                        result_win_log(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
-                        Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
-                        break;
-                }
-            } else if (rPkt.getSender() == RCV_packet.ID_SM) {
-                switch (rPkt.getmID()) {
                     case RCV_packet.HMS_COMMON_MUSIC_INFO:
-                        rcv_HMS_COMMON_MUSIC_INFO rd1 = new rcv_HMS_COMMON_MUSIC_INFO(rPkt.getData());
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getTitle " + rd1.getTitle());
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getArtist " + rd1.getArtist());
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getAlbum " + rd1.getAlbum());
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getGenr " + rd1.getGenr());
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getPosition " + String.valueOf(rd1.getPosition()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getDuration " + String.valueOf(rd1.getDuration()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getIndex " + String.valueOf(rd1.getIndex()));
+                        rcv_HMS_COMMON_MUSIC_INFO rd21 = new rcv_HMS_COMMON_MUSIC_INFO(rPkt.getData());
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getTitle " + rd21.getTitle());
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getArtist " + rd21.getArtist());
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getAlbum " + rd21.getAlbum());
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getGenr " + rd21.getGenr());
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getPosition " + String.valueOf(rd21.getPosition()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getDuration " + String.valueOf(rd21.getDuration()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_MUSIC_INFO.getIndex " + String.valueOf(rd21.getIndex()));
                         break;
 
                     case RCV_packet.HMS_TPCR_PLAY_CONTENTS_INFO:
-                        rcv_HMS_TPCR_PLAY_CONTENTS_INFO rd2 = new rcv_HMS_TPCR_PLAY_CONTENTS_INFO(rPkt.getData());
-                        result_win_log(TAG, "rcv_HMS_TPCR_PLAY_CONTENTS_INFO.getPlayingContents " + String.valueOf(rd2.getPlayingContents()));
-                        result_win_log(TAG, "rcv_HMS_TPCR_PLAY_CONTENTS_INFO.getPlayStatus " + String.valueOf(rd2.getPlayStatus()));
-                        result_win_log(TAG, "rcv_HMS_TPCR_PLAY_CONTENTS_INFO.getPlayDisplay " + String.valueOf(rd2.getPlayDisplay()));
+                        rcv_HMS_TPCR_PLAY_CONTENTS_INFO rd22 = new rcv_HMS_TPCR_PLAY_CONTENTS_INFO(rPkt.getData());
+                        result_win_log(TAG, "rcv_HMS_TPCR_PLAY_CONTENTS_INFO.getPlayingContents " + String.valueOf(rd22.getPlayingContents()));
+                        result_win_log(TAG, "rcv_HMS_TPCR_PLAY_CONTENTS_INFO.getPlayStatus " + String.valueOf(rd22.getPlayStatus()));
+                        result_win_log(TAG, "rcv_HMS_TPCR_PLAY_CONTENTS_INFO.getPlayDisplay " + String.valueOf(rd22.getPlayDisplay()));
                         break;
 
-                    default:
-                        result_win_log(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
-                        Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
-                        break;
-                }
-            } else if (rPkt.getSender() == RCV_packet.ID_VM) {
-                switch (rPkt.getmID()) {
                     case RCV_packet.HMS_COMMON_DISPLAY_DANGER_INFO:
-                        rcv_HMS_COMMON_DISPLAY_DANGER_INFO rd1 = new rcv_HMS_COMMON_DISPLAY_DANGER_INFO(rPkt.getData());
-                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_INFO.getIconCode " + String.valueOf(rd1.getIconCode()));
+                        rcv_HMS_COMMON_DISPLAY_DANGER_INFO rd23 = new rcv_HMS_COMMON_DISPLAY_DANGER_INFO(rPkt.getData());
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_INFO.getType " + String.valueOf(rd23.getType()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_INFO.getRiskLevel " + String.valueOf(rd23.getRiskLevel()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_INFO.getParam2 " + String.valueOf(rd23.getParam2()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_INFO.getParam3 " + String.valueOf(rd23.getParam3()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_INFO.getDisplay " + String.valueOf(rd23.getDisplay()));
                         break;
 
                     case RCV_packet.HMS_COMMON_DISPLAY_DANGER_ALARM:
-                        rcv_HMS_COMMON_DISPLAY_DANGER_ALARM rd2 = new rcv_HMS_COMMON_DISPLAY_DANGER_ALARM(rPkt.getData());
-                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getDisplay " + String.valueOf(rd2.getDisplay()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getSound " + String.valueOf(rd2.getSound()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getHaptic " + String.valueOf(rd2.getHaptic()));
-                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getInterval " + String.valueOf(rd2.getInterval()));
+                        rcv_HMS_COMMON_DISPLAY_DANGER_ALARM rd24 = new rcv_HMS_COMMON_DISPLAY_DANGER_ALARM(rPkt.getData());
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getDisplay " + String.valueOf(rd24.getDisplay()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getSound " + String.valueOf(rd24.getSound()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getHaptic " + String.valueOf(rd24.getHaptic()));
+                        result_win_log(TAG, "rcv_HMS_COMMON_DISPLAY_DANGER_ALARM.getInterval " + String.valueOf(rd24.getInterval()));
                         break;
                     default:
-                        result_win_log(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
-                        Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
+                        Log.i(TAG, "What?? sender = " + String.valueOf((int)rPkt.getSender()));
+                        Log.i(TAG, "What?? mID = " + String.valueOf((int)rPkt.getmID()));
                         break;
                 }
-            } else {
-                result_win_log( "What?? sender = " + String.valueOf(rPkt.getSender()), true);
-                result_win_log( "What?? mID = " + String.valueOf(rPkt.getmID()), true);
-                Log.i(TAG, "What?? sender = " + String.valueOf(rPkt.getSender()));
-                Log.i(TAG, "What?? mID = " + String.valueOf(rPkt.getmID()));
             }
 
         }
