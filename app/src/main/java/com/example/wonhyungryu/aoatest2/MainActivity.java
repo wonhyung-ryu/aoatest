@@ -1,13 +1,17 @@
 package com.example.wonhyungryu.aoatest2;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +22,7 @@ import android.widget.TextView;
 import com.android.future.usb.UsbAccessory;
 import com.android.future.usb.UsbManager;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -41,6 +46,16 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     boolean acc_closed = true;
     boolean usb_detech = true;
 
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    public static final String LOGDIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()+"/";
+    static FileOutputStream AOAlogFileStream;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +71,25 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         if (getLastNonConfigurationInstance() != null) {
             mAccessory = (UsbAccessory) getLastNonConfigurationInstance();
             openAccessory(mAccessory);
+        }
+
+        // Assume thisActivity is the current activity
+        int permissionCheck = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+        }
+
+        String LOGFILE = "AOAlog" + Long.toString(System.currentTimeMillis() / 1000L) + ".txt";
+        File lfile = new File(LOGDIR+ LOGFILE);
+
+        try {
+            if (!lfile.exists()) {
+                lfile.createNewFile();
+            }
+            AOAlogFileStream = new FileOutputStream(lfile);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         Button mBTN_S1 = (Button) findViewById(R.id.BTN_S1);
@@ -585,11 +619,15 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         mResult.setText(res_buf);
     }
 
-    private void result_win_log(String tag, String lmsg) {
+/*    private void result_win_log(String tag, String lmsg) {
         Log.i(TAG, lmsg);
-    }
-    /*
+    }*/
+
     private void result_win_log(String tag, String lmsg) {
+        LogToFile(lmsg);
+    }
+
+/*    private void result_win_log(String tag, String lmsg) {
         TextView mResult = (TextView) findViewById(R.id.result);
         if (result_line >= 25) {
             result_line = 0;
@@ -600,6 +638,14 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         mResult.setText(res_buf);
     }
     */
+
+    public void LogToFile (String llog) {
+        try {
+            AOAlogFileStream.write((llog+"\n").getBytes());
+        } catch (Exception e){
+        }
+    }
+
     public static String toHexString(byte b) {
         char[] digits = {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
